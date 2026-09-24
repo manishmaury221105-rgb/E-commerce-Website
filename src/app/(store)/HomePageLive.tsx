@@ -76,19 +76,19 @@ export function HomePageLive({
       <section className="py-4">
         <div className="flex items-center justify-between mb-5">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 flex items-center justify-center font-bold">
-              <Sparkles className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+            <div className="w-8 h-8 rounded-xl bg-orange-100 dark:bg-orange-950 text-orange-700 dark:text-orange-400 flex items-center justify-center font-bold">
+              <Sparkles className="w-4 h-4 text-orange-600 dark:text-orange-400" />
             </div>
             <div>
               <h2 className="font-heading font-extrabold text-lg sm:text-2xl text-slate-900 dark:text-white tracking-tight">
-                Featured Highlights
+                Featured Wedding Collections
               </h2>
-              <p className="text-xs text-slate-500 dark:text-slate-400">Handpicked popular items from our store</p>
+              <p className="text-xs text-slate-500 dark:text-slate-400">Handpicked bridal & festive masterpieces</p>
             </div>
           </div>
           <Link
             href="/products?featured=true"
-            className="text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 flex items-center gap-1 group"
+            className="text-xs font-bold text-orange-600 dark:text-orange-400 hover:text-orange-700 flex items-center gap-1 group"
           >
             <span>View All</span>
             <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
@@ -103,32 +103,32 @@ export function HomePageLive({
       </section>
 
       {/* 6. Special Promotional Callout Banner */}
-      <div className="relative rounded-3xl overflow-hidden bg-gradient-to-r from-emerald-800 via-teal-900 to-slate-900 p-6 sm:p-10 text-white shadow-xl">
+      <div className="relative rounded-3xl overflow-hidden bg-gradient-to-r from-orange-900 via-rose-950 to-slate-950 p-6 sm:p-10 text-white shadow-xl border border-orange-800/30">
         <div className="max-w-2xl space-y-3 relative z-10">
           <span className="bg-amber-400 text-amber-950 text-[10px] font-extrabold px-2.5 py-1 rounded-full uppercase tracking-wider">
-            LOCAL COMMUNITY SUPPORT
+            ✨ SHUBH VIVAH SPECIAL
           </span>
           <h3 className="font-heading font-extrabold text-2xl sm:text-3xl">
-            Want to order your customary grocery list?
+            Need Custom Bridal Fitting or Bulk Wedding Orders?
           </h3>
-          <p className="text-xs sm:text-sm text-emerald-100 leading-relaxed">
-            Just snap a photo of your handwritten grocery list or type your items on WhatsApp. Our store staff will pack and deliver directly within 45 minutes!
+          <p className="text-xs sm:text-sm text-orange-100/90 leading-relaxed">
+            Connect directly with our master designers on WhatsApp. Share your custom measurements, embroidery preferences, or wedding invitation list for personalized service!
           </p>
           <div className="pt-2 flex flex-wrap gap-3">
             <a
-              href="https://wa.me/917380492118?text=Hi%20FreshMart,%20here%20is%20my%20grocery%20order%20list:"
+              href="https://wa.me/917380492118?text=Hi%20Chaitanya%20Shree,%20I%20would%20like%20to%20inquire%20about%20custom%20wedding%20orders:"
               target="_blank"
               rel="noopener noreferrer"
               className="bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold text-xs sm:text-sm px-5 py-2.5 rounded-xl flex items-center gap-2 shadow-lg transition-all active:scale-95"
             >
               <PhoneCall className="w-4 h-4" />
-              <span>Send Grocery List on WhatsApp</span>
+              <span>WhatsApp Wedding Designer</span>
             </a>
             <Link
               href="/products"
               className="bg-white/10 hover:bg-white/20 text-white font-semibold text-xs sm:text-sm px-5 py-2.5 rounded-xl border border-white/20 backdrop-blur-md transition-colors"
             >
-              Browse Online Catalog
+              Explore Full Collection
             </Link>
           </div>
         </div>

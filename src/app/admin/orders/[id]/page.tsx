@@ -218,14 +218,16 @@ export default function AdminOrderDetailPage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b-2 border-slate-900">
           <div>
             <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-emerald-600 text-white font-bold flex items-center justify-center">
-                <ShoppingBag className="w-5 h-5" />
-              </div>
+              <img
+                src="/logo.png"
+                alt="चैतन्य श्री"
+                className="h-8 w-auto object-contain rounded"
+              />
               <h2 className="font-heading font-extrabold text-xl text-slate-900">
-                FreshMart Local Supermarket
+                चैतन्य श्री (Chaitanya Shree)
               </h2>
             </div>
-            <p className="text-xs text-slate-600 mt-1">Shop #14, Main Market Square • 45-Min Express Delivery</p>
+            <p className="text-xs text-slate-600 mt-1">Shop #14, Royal Wedding Bazaar • Complete Wedding Collections</p>
             <p className="text-xs text-slate-500">Phone / WhatsApp: +91 73804 92118</p>
           </div>
 
@@ -259,7 +261,7 @@ export default function AdminOrderDetailPage() {
               Fulfillment & Payment
             </span>
             <p className="text-slate-700">
-              <strong>Slot:</strong> {order.deliverySlot || "⚡ 45-Min Express"}
+              <strong>Slot:</strong> {order.deliverySlot || "⚡ Express Dispatch"}
             </p>
             <p className="text-slate-700">
               <strong>Payment Method:</strong> {PAYMENT_METHOD_LABELS[order.paymentMethod] || order.paymentMethod}
@@ -332,8 +334,8 @@ export default function AdminOrderDetailPage() {
 
         {/* Footer */}
         <div className="border-t border-slate-200 pt-4 text-center text-[10px] text-slate-500">
-          <p className="font-semibold">Thank you for ordering with FreshMart Local Supermarket!</p>
-          <p>For instant support or returns, WhatsApp us anytime at +91 73804 92118.</p>
+          <p className="font-semibold">Thank you for choosing चैतन्य श्री (Chaitanya Shree) Wedding Collections!</p>
+          <p>For custom bridal orders or inquiries, WhatsApp us at +91 73804 92118.</p>
         </div>
       </div>
     </div>

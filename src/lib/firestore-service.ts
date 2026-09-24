@@ -38,16 +38,16 @@ import {
 // ==========================================
 const DEFAULT_SETTINGS: StoreSetting = {
   id: "default",
-  shopName: "FreshMart Local Supermarket",
+  shopName: "चैतन्य श्री (Chaitanya Shree) - Wedding & Festive Collection",
   phone: "+91 73804 92118",
   whatsapp: "+917380492118",
-  email: "contact@freshmart.local",
-  address: "Shop #14, Main Market Square, Near Central Clock Tower",
+  email: "contact@chaitanyashree.com",
+  address: "चैतन्य श्री वेडिंग मॉल, मेन मार्केट, नियर सेंट्रल क्लॉक टॉवर",
   currency: "₹",
-  freeDeliveryMin: 499,
-  deliveryFee: 40,
-  announcement: "⚡ Super Fast Local Delivery in under 45 mins! Use code WELCOME10 for 10% OFF",
-  openHours: "Mon - Sun: 7:00 AM - 10:30 PM",
+  freeDeliveryMin: 999,
+  deliveryFee: 50,
+  announcement: "✨ चैतन्य श्री वेडिंग उत्सव: सभी शादी व ब्राइडल कलेक्शन्स पर 20% तक की छूट! Use code: SHUBHVIVAH",
+  openHours: "Mon - Sun: 9:00 AM - 10:00 PM",
 };
 
 export async function getStoreSettings(): Promise<StoreSetting> {
@@ -482,7 +482,7 @@ export async function createOrder(data: {
       {
         status: "CONFIRMED",
         timestamp: new Date().toISOString(),
-        note: "Order confirmed and being prepared by FreshMart store staff.",
+        note: "Order confirmed and being prepared by चैतन्य श्री store staff.",
       },
     ],
     invoiceNumber: `INV-${Date.now().toString().slice(-6)}`,

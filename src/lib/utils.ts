@@ -45,7 +45,7 @@ export function generateOrderNumber(): string {
 
 export function generateWhatsAppSupportLink(phone: string, message?: string): string {
   const cleanPhone = phone.replace(/[^0-9]/g, "");
-  const defaultMsg = message || "Hello FreshMart! I have a question about my shopping order.";
+  const defaultMsg = message || "नमस्ते चैतन्य श्री! I have an inquiry regarding wedding collections / custom orders.";
   return `https://wa.me/${cleanPhone}?text=${encodeURIComponent(defaultMsg)}`;
 }
 
@@ -56,7 +56,7 @@ export function generateWhatsAppProductOrderLink(
   productUrl: string
 ): string {
   const cleanPhone = phone.replace(/[^0-9]/g, "");
-  const msg = `Hi FreshMart, I would like to order this item directly:\n\n🛍️ *${productName}*\n💰 Price: ₹${price}\n🔗 Product link: ${productUrl}\n\nPlease confirm availability and delivery time. Thank you!`;
+  const msg = `नमस्ते चैतन्य श्री (Chaitanya Shree),\n\nI would like to order/inquire about this wedding item:\n✨ *${productName}*\n💰 Price: ₹${price}\n🔗 Link: ${productUrl}\n\nPlease confirm availability and delivery timeline. Dhanyawad!`;
   return `https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`;
 }
 
@@ -68,6 +68,6 @@ export function generateWhatsAppOrderSummaryLink(
   customerName: string
 ): string {
   const cleanPhone = phone.replace(/[^0-9]/g, "");
-  const msg = `Hi FreshMart, I just placed an order on the website:\n\n📦 *Order ID:* ${orderNumber}\n👤 *Customer:* ${customerName}\n🛒 *Items:* ${itemsCount}\n💵 *Total Amount:* ₹${total}\n\nPlease verify and process my order. Thank you!`;
+  const msg = `नमस्ते चैतन्य श्री,\n\nI just placed an order on your store:\n📦 *Order ID:* ${orderNumber}\n👤 *Customer:* ${customerName}\n🛍️ *Items:* ${itemsCount}\n💵 *Total Amount:* ₹${total}\n\nPlease confirm and share tracking details. Dhanyawad!`;
   return `https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`;
 }

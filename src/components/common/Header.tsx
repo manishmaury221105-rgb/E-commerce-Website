@@ -55,29 +55,29 @@ export function Header() {
   return (
     <header className="sticky top-0 z-40 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 shadow-xs transition-colors duration-300">
       {/* 1. Top Announcement Ribbon */}
-      <div className="bg-gradient-to-r from-emerald-700 via-emerald-600 to-teal-700 text-white text-xs py-1.5 px-4">
+      <div className="bg-gradient-to-r from-orange-600 via-amber-600 to-rose-700 text-white text-xs py-1.5 px-4 shadow-xs">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-2 overflow-hidden whitespace-nowrap">
-            <span className="bg-amber-400 text-amber-950 font-bold px-1.5 py-0.5 rounded-sm text-[10px] uppercase tracking-wider">
-              Special
+            <span className="bg-amber-300 text-amber-950 font-extrabold px-1.5 py-0.5 rounded-sm text-[10px] uppercase tracking-wider shadow-xs">
+              ✨ Shubh Vivah
             </span>
-            <span className="truncate text-[11px] sm:text-xs">
-              ⚡ Free Local Delivery on orders above ₹499! Use code <strong className="underline font-bold">WELCOME10</strong> for 10% OFF
+            <span className="truncate text-[11px] sm:text-xs font-medium">
+              चैतन्य श्री वेडिंग स्पेशल: सभी शादी कलेक्शन्स पर 20% तक छूट! Use code <strong className="underline font-bold">SHUBHVIVAH</strong>
             </span>
           </div>
-          <div className="hidden md:flex items-center gap-4 text-emerald-100 flex-shrink-0">
+          <div className="hidden md:flex items-center gap-4 text-orange-100 flex-shrink-0 text-xs">
             <a
-              href="https://wa.me/917380492118?text=Hi%20FreshMart,%20I%20need%20help%20with%20my%20order"
+              href="https://wa.me/917380492118?text=Hi%20Chaitanya%20Shree,%20I%20need%20help%20with%20wedding%20collection"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-1 hover:text-white transition-colors"
             >
-              <MessageCircle className="w-3.5 h-3.5 text-emerald-300" />
-              <span>WhatsApp Support</span>
+              <MessageCircle className="w-3.5 h-3.5 text-amber-300" />
+              <span>WhatsApp Help</span>
             </a>
             <span>|</span>
             <span className="flex items-center gap-1">
-              <Phone className="w-3.5 h-3.5" />
+              <Phone className="w-3.5 h-3.5 text-amber-300" />
               <span>+91 73804 92118</span>
             </span>
           </div>
@@ -89,28 +89,32 @@ export function Header() {
         <div className="flex items-center justify-between h-16 md:h-20 gap-3 md:gap-6">
           {/* Brand Logo */}
           <Link href="/" className="flex items-center gap-2.5 flex-shrink-0 group">
-            <div className="w-10 h-10 md:w-11 md:h-11 rounded-xl bg-gradient-to-tr from-emerald-600 to-green-500 flex items-center justify-center text-white shadow-md shadow-emerald-500/20 group-hover:scale-105 transition-transform duration-200">
-              <ShoppingBag className="w-6 h-6" />
+            <div className="h-10 md:h-13 w-auto flex items-center group-hover:scale-105 transition-transform duration-200">
+              <img
+                src="/logo.png"
+                alt="चैतन्य श्री"
+                className="h-10 md:h-12 w-auto object-contain rounded-lg"
+              />
             </div>
             <div>
               <div className="flex items-center gap-1.5">
-                <span className="font-heading font-extrabold text-xl md:text-2xl tracking-tight text-slate-900 dark:text-white">
-                  Fresh<span className="text-emerald-600 dark:text-emerald-400">Mart</span>
+                <span className="font-heading font-extrabold text-xl md:text-2xl tracking-tight text-orange-600 dark:text-orange-400">
+                  चैतन्य <span className="text-amber-600 dark:text-amber-400">श्री</span>
                 </span>
-                <span className="bg-emerald-100 dark:bg-emerald-950/80 text-emerald-800 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800 text-[10px] font-bold px-1.5 py-0.5 rounded-full hidden sm:inline-block">
-                  LOCAL SHOP
+                <span className="bg-orange-100 dark:bg-orange-950/80 text-orange-800 dark:text-orange-300 border border-orange-200 dark:border-orange-800 text-[10px] font-bold px-1.5 py-0.5 rounded-full hidden sm:inline-block">
+                  WEDDING STORE
                 </span>
               </div>
-              <p className="text-[11px] text-slate-500 dark:text-slate-400 hidden sm:block">Farm Fresh • 45 Min Delivery</p>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400 hidden sm:block">Royal Wedding & Festive Collection</p>
             </div>
           </Link>
 
           {/* Delivery Location Indicator */}
-          <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 bg-slate-100/80 dark:bg-slate-800 rounded-xl border border-slate-200/60 dark:border-slate-700 text-xs">
-            <MapPin className="w-4 h-4 text-emerald-600 dark:text-emerald-400 flex-shrink-0 animate-bounce" />
+          <div className="hidden lg:flex items-center gap-2 px-3 py-1.5 bg-orange-50/60 dark:bg-slate-800 rounded-xl border border-orange-200/60 dark:border-slate-700 text-xs">
+            <MapPin className="w-4 h-4 text-orange-600 dark:text-orange-400 flex-shrink-0 animate-bounce" />
             <div>
-              <p className="text-slate-500 dark:text-slate-400 font-medium leading-none">Delivering to</p>
-              <p className="font-bold text-slate-800 dark:text-slate-200 leading-tight">City Center (Within 45m)</p>
+              <p className="text-slate-500 dark:text-slate-400 font-medium leading-none">All India Delivery</p>
+              <p className="font-bold text-slate-800 dark:text-slate-200 leading-tight">Express Wedding Dispatch</p>
             </div>
           </div>
 
@@ -121,13 +125,13 @@ export function Header() {
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Search for fresh fruits, milk, basmati rice, snacks..."
-                className="w-full bg-slate-100/90 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-750 focus:bg-white dark:focus:bg-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 pl-11 pr-24 py-2.5 rounded-full border border-slate-200 dark:border-slate-700 focus:border-emerald-500 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 text-sm transition-all"
+                placeholder="Search Bridal Lehengas, Sherwanis, Wedding Cards, Pooja Items..."
+                className="w-full bg-slate-100/90 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-750 focus:bg-white dark:focus:bg-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 pl-11 pr-24 py-2.5 rounded-full border border-slate-200 dark:border-slate-700 focus:border-orange-500 focus:outline-none focus:ring-2 focus:ring-orange-500/20 text-sm transition-all"
               />
               <Search className="w-4 h-4 text-slate-400 absolute left-4 pointer-events-none" />
               <button
                 type="submit"
-                className="absolute right-1.5 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold px-4 py-1.5 rounded-full transition-colors shadow-xs"
+                className="absolute right-1.5 bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white text-xs font-semibold px-4 py-1.5 rounded-full transition-all shadow-xs"
               >
                 Search
               </button>
@@ -154,9 +158,9 @@ export function Header() {
                 <div className="relative">
                   <button
                     onClick={() => setIsUserMenuOpen(!isUserMenuOpen)}
-                    className="flex items-center gap-2 p-1.5 sm:px-3 sm:py-2 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 border border-transparent hover:border-slate-200 dark:hover:border-slate-700 transition-all text-xs font-medium text-slate-700 dark:text-slate-300"
+                    className="flex items-center gap-2 p-1.5 sm:px-3 sm:py-2 rounded-xl hover:bg-orange-50 dark:hover:bg-slate-800 border border-transparent hover:border-orange-200 dark:hover:border-slate-700 transition-all text-xs font-medium text-slate-700 dark:text-slate-300"
                   >
-                    <div className="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900/60 text-emerald-700 dark:text-emerald-300 font-bold flex items-center justify-center">
+                    <div className="w-8 h-8 rounded-full bg-orange-100 dark:bg-orange-950 text-orange-700 dark:text-orange-300 font-bold flex items-center justify-center">
                       {user.name.charAt(0).toUpperCase()}
                     </div>
                     <div className="hidden md:block text-left">
@@ -175,7 +179,7 @@ export function Header() {
                       <div className="px-4 py-2 border-b border-slate-100 dark:border-slate-700">
                         <p className="text-xs text-slate-400">Signed in as</p>
                         <p className="text-sm font-bold text-slate-800 dark:text-white truncate">{user.name}</p>
-                        <span className="inline-block mt-1 text-[10px] font-semibold uppercase px-2 py-0.5 bg-emerald-100 dark:bg-emerald-900 text-emerald-800 dark:text-emerald-300 rounded-md">
+                        <span className="inline-block mt-1 text-[10px] font-semibold uppercase px-2 py-0.5 bg-orange-100 dark:bg-orange-950 text-orange-800 dark:text-orange-300 rounded-md">
                           {user.role}
                         </span>
                       </div>
@@ -183,9 +187,9 @@ export function Header() {
                       {isAdmin && (
                         <Link
                           href="/admin"
-                          className="flex items-center gap-2.5 px-4 py-2.5 text-sm font-semibold text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-slate-700 transition-colors"
+                          className="flex items-center gap-2.5 px-4 py-2.5 text-sm font-semibold text-orange-700 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-slate-700 transition-colors"
                         >
-                          <ShieldCheck className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                          <ShieldCheck className="w-4 h-4 text-orange-600 dark:text-orange-400" />
                           <span>Admin Control Panel</span>
                         </Link>
                       )}
@@ -229,9 +233,9 @@ export function Header() {
               ) : (
                 <Link
                   href="/auth/login"
-                  className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-semibold text-xs transition-colors"
+                  className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-orange-50 hover:bg-orange-100 dark:bg-slate-800 dark:hover:bg-slate-700 text-orange-900 dark:text-orange-200 border border-orange-200 dark:border-slate-700 font-semibold text-xs transition-colors"
                 >
-                  <UserIcon className="w-4 h-4 text-slate-600 dark:text-slate-400" />
+                  <UserIcon className="w-4 h-4 text-orange-600 dark:text-orange-400" />
                   <span className="hidden sm:inline">Sign In</span>
                 </Link>
               )}
@@ -240,13 +244,13 @@ export function Header() {
             {/* Quick Cart Trigger Button */}
             <button
               onClick={openCart}
-              className="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs sm:text-sm transition-all shadow-md shadow-emerald-600/20 active:scale-95"
+              className="flex items-center gap-2 px-3 sm:px-4 py-2 rounded-xl bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white font-semibold text-xs sm:text-sm transition-all shadow-md shadow-orange-600/20 active:scale-95"
               aria-label="Open cart"
             >
               <div className="relative">
                 <ShoppingBag className="w-4 h-4 sm:w-5 sm:h-5" />
                 {itemCount > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-amber-400 text-amber-950 font-bold text-[10px] w-4 h-4 rounded-full flex items-center justify-center animate-pulse-soft shadow-xs">
+                  <span className="absolute -top-2 -right-2 bg-amber-300 text-amber-950 font-bold text-[10px] w-4 h-4 rounded-full flex items-center justify-center animate-pulse-soft shadow-xs">
                     {itemCount}
                   </span>
                 )}
@@ -265,10 +269,10 @@ export function Header() {
             <div className="relative">
               <button
                 onClick={() => setIsCategoryMenuOpen(!isCategoryMenuOpen)}
-                className="flex items-center gap-1.5 text-slate-900 dark:text-white font-bold hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
+                className="flex items-center gap-1.5 text-slate-900 dark:text-white font-bold hover:text-orange-600 dark:hover:text-orange-400 transition-colors"
               >
-                <SlidersHorizontal className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-                <span>All Categories</span>
+                <SlidersHorizontal className="w-3.5 h-3.5 text-orange-600 dark:text-orange-400" />
+                <span>Wedding Categories</span>
                 <ChevronDown className={`w-3.5 h-3.5 transition-transform ${isCategoryMenuOpen ? "rotate-180" : ""}`} />
               </button>
 
@@ -279,17 +283,17 @@ export function Header() {
                 >
                   <Link
                     href="/products"
-                    className="px-4 py-2 hover:bg-emerald-50 dark:hover:bg-slate-750 text-slate-800 dark:text-white font-bold text-xs flex items-center justify-between"
+                    className="px-4 py-2 hover:bg-orange-50 dark:hover:bg-slate-750 text-slate-800 dark:text-white font-bold text-xs flex items-center justify-between"
                   >
-                    <span>View All Products</span>
-                    <span className="text-emerald-600 dark:text-emerald-400 font-bold">➔</span>
+                    <span>View All Collections</span>
+                    <span className="text-orange-600 dark:text-orange-400 font-bold">➔</span>
                   </Link>
                   <div className="border-t border-slate-100 dark:border-slate-700 my-1"></div>
                   {categories.map((cat) => (
                     <Link
                       key={cat.id}
                       href={`/products?category=${cat.slug}`}
-                      className="px-4 py-2 hover:bg-emerald-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 hover:text-emerald-700 dark:hover:text-emerald-400 text-xs flex items-center justify-between transition-colors"
+                      className="px-4 py-2 hover:bg-orange-50 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 hover:text-orange-700 dark:hover:text-orange-400 text-xs flex items-center justify-between transition-colors"
                     >
                       <span>{cat.name}</span>
                       {cat.productCount !== undefined && (
@@ -309,28 +313,28 @@ export function Header() {
                 <Link
                   key={cat.id}
                   href={`/products?category=${cat.slug}`}
-                  className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors"
+                  className="hover:text-orange-600 dark:hover:text-orange-400 transition-colors"
                 >
                   {cat.name}
                 </Link>
               ))}
               <Link href="/products?deal=true" className="text-rose-600 dark:text-rose-400 font-bold flex items-center gap-1 hover:text-rose-700">
-                <span>🔥 Deals of the Day</span>
+                <span>🔥 Vivah Offers</span>
               </Link>
             </div>
           </div>
 
           <div className="flex items-center gap-4 text-slate-500 dark:text-slate-400">
-            <Link href="/orders" className="hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors">
+            <Link href="/orders" className="hover:text-orange-600 dark:hover:text-orange-400 transition-colors">
               Track Order
             </Link>
             <a
-              href="https://wa.me/917380492118"
+              href="https://wa.me/917380492118?text=Hi%20Chaitanya%20Shree,%20I%20want%20to%20place%20a%20wedding%20order"
               target="_blank"
               rel="noopener noreferrer"
-              className="text-emerald-600 dark:text-emerald-400 font-semibold hover:underline"
+              className="text-orange-600 dark:text-orange-400 font-semibold hover:underline"
             >
-              Order on WhatsApp
+              Custom Wedding Inquiry
             </a>
           </div>
         </div>
@@ -342,13 +346,13 @@ export function Header() {
               type="text"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search fruits, milk, rice, snacks..."
-              className="w-full bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 pl-10 pr-20 py-2.5 rounded-full border border-slate-200 dark:border-slate-700 text-xs focus:bg-white dark:focus:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500 shadow-inner"
+              placeholder="Search lehengas, sherwanis, wedding items..."
+              className="w-full bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white placeholder:text-slate-400 pl-10 pr-20 py-2.5 rounded-full border border-slate-200 dark:border-slate-700 text-xs focus:bg-white dark:focus:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-orange-500 shadow-inner"
             />
             <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-3" />
             <button
               type="submit"
-              className="absolute right-1.5 top-1.5 bg-emerald-600 active:scale-95 text-white text-[11px] font-bold px-3.5 py-1 rounded-full shadow-xs"
+              className="absolute right-1.5 top-1.5 bg-orange-600 active:scale-95 text-white text-[11px] font-bold px-3.5 py-1 rounded-full shadow-xs"
             >
               Go
             </button>
@@ -371,11 +375,13 @@ export function Header() {
               {/* Header */}
               <div className="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
                 <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 rounded-xl bg-emerald-600 flex items-center justify-center text-white font-bold">
-                    <ShoppingBag className="w-4 h-4" />
-                  </div>
-                  <span className="font-heading font-extrabold text-base text-slate-900 dark:text-white">
-                    Fresh<span className="text-emerald-600 dark:text-emerald-400">Mart</span>
+                  <img
+                    src="/logo.png"
+                    alt="चैतन्य श्री"
+                    className="h-8 w-auto object-contain rounded-md"
+                  />
+                  <span className="font-heading font-extrabold text-base text-orange-600 dark:text-orange-400">
+                    चैतन्य <span className="text-amber-600 dark:text-amber-400">श्री</span>
                   </span>
                 </div>
                 <button
@@ -391,29 +397,29 @@ export function Header() {
               <Link
                 href="/products?deal=true"
                 onClick={() => setIsMobileMenuOpen(false)}
-                className="flex items-center justify-between p-3 rounded-2xl bg-gradient-to-r from-amber-500/10 to-rose-500/10 border border-amber-500/30 text-amber-900 dark:text-amber-300 text-xs font-bold active:scale-98"
+                className="flex items-center justify-between p-3 rounded-2xl bg-gradient-to-r from-orange-500/10 to-amber-500/10 border border-orange-500/30 text-orange-950 dark:text-orange-300 text-xs font-bold active:scale-98"
               >
                 <div className="flex items-center gap-2">
-                  <span className="text-base">🔥</span>
-                  <span>Today's Flash Deals</span>
+                  <span className="text-base">✨</span>
+                  <span>Vivah Special Offers</span>
                 </div>
-                <span className="bg-amber-400 text-amber-950 px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase">
-                  Up to 40% OFF
+                <span className="bg-orange-600 text-white px-2 py-0.5 rounded-full text-[10px] font-extrabold uppercase">
+                  Up to 30% OFF
                 </span>
               </Link>
 
               {/* Categories Navigation */}
               <div>
                 <h4 className="text-[11px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-2">
-                  Shop By Category
+                  Wedding Collections
                 </h4>
                 <div className="space-y-1">
                   <Link
                     href="/products"
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/40"
+                    className="flex items-center justify-between px-3 py-2 rounded-xl text-xs font-bold text-orange-700 dark:text-orange-400 bg-orange-50 dark:bg-orange-950/40"
                   >
-                    <span>All Products</span>
+                    <span>All Collections</span>
                     <span>➔</span>
                   </Link>
                   {categories.map((cat) => (
@@ -441,25 +447,25 @@ export function Header() {
                   onClick={() => setIsMobileMenuOpen(false)}
                   className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 font-medium"
                 >
-                  <Package className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                  <Package className="w-4 h-4 text-orange-600 dark:text-orange-400" />
                   <span>Track My Orders</span>
                 </Link>
 
                 <a
-                  href="https://wa.me/917380492118"
+                  href="https://wa.me/917380492118?text=Hi%20Chaitanya%20Shree,%20I%20need%20help%20with%20wedding%20orders"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 font-medium"
                 >
                   <MessageCircle className="w-4 h-4 text-[#25D366]" />
-                  <span>WhatsApp Grocery Support</span>
+                  <span>WhatsApp Wedding Support</span>
                 </a>
 
                 {isAdmin && (
                   <Link
                     href="/admin"
                     onClick={() => setIsMobileMenuOpen(false)}
-                    className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-emerald-700 dark:text-emerald-400 hover:bg-emerald-50 dark:hover:bg-slate-800 font-bold"
+                    className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-orange-700 dark:text-orange-400 hover:bg-orange-50 dark:hover:bg-slate-800 font-bold"
                   >
                     <ShieldCheck className="w-4 h-4" />
                     <span>Admin Control Panel</span>
@@ -473,7 +479,7 @@ export function Header() {
               {user ? (
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full bg-emerald-100 dark:bg-emerald-900 text-emerald-700 dark:text-emerald-300 font-bold flex items-center justify-center text-xs">
+                    <div className="w-8 h-8 rounded-full bg-orange-100 dark:bg-orange-950 text-orange-700 dark:text-orange-300 font-bold flex items-center justify-center text-xs">
                       {user.name.charAt(0).toUpperCase()}
                     </div>
                     <div>
@@ -498,7 +504,7 @@ export function Header() {
                 <Link
                   href="/auth/login"
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 text-xs shadow-md"
+                  className="w-full bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white font-bold py-2.5 px-4 rounded-xl flex items-center justify-center gap-2 text-xs shadow-md"
                 >
                   <UserIcon className="w-4 h-4" />
                   <span>Sign In / Register</span>

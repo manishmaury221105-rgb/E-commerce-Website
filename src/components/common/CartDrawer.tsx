@@ -250,7 +250,7 @@ export function CartDrawer() {
                 <Link
                   href="/checkout"
                   onClick={closeCart}
-                  className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 text-sm shadow-md shadow-emerald-600/20 active:scale-98 transition-all"
+                  className="w-full bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 text-sm shadow-md shadow-orange-600/20 active:scale-98 transition-all"
                 >
                   <span>Proceed to Checkout</span>
                   <ArrowRight className="w-4 h-4" />
@@ -259,9 +259,9 @@ export function CartDrawer() {
                 <a
                   href={generateWhatsAppSupportLink(
                     "+917380492118",
-                    `Hi FreshMart, I would like to order my cart items directly:\n${items
+                    `नमस्ते चैतन्य श्री, I would like to place an order for my cart:\n${items
                       .map((i) => `• ${i.name} (${i.unit}) x ${i.quantity} = ₹${i.price * i.quantity}`)
-                      .join("\n")}\n\n*Total:* ₹${total}`
+                      .join("\n")}\n\n*Total:* ₹${total}\n\nPlease confirm availability. Dhanyawad!`
                   )}
                   target="_blank"
                   rel="noopener noreferrer"

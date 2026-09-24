@@ -23,21 +23,21 @@ export function MobileNav() {
         <div className="fixed bottom-[68px] left-3 right-3 z-40 md:hidden animate-in slide-in-from-bottom-3 duration-300">
           <div
             onClick={openCart}
-            className="bg-gradient-to-r from-emerald-600 to-teal-600 dark:from-emerald-700 dark:to-teal-800 text-white p-3 rounded-2xl shadow-2xl flex items-center justify-between cursor-pointer active:scale-98 transition-all border border-emerald-400/40"
+            className="bg-gradient-to-r from-orange-600 via-amber-600 to-rose-600 text-white p-3 rounded-2xl shadow-2xl flex items-center justify-between cursor-pointer active:scale-98 transition-all border border-amber-400/40"
           >
             <div className="flex items-center gap-2.5">
               <div className="w-7 h-7 rounded-xl bg-white/20 flex items-center justify-center font-extrabold text-xs shadow-inner">
                 {itemCount}
               </div>
               <div>
-                <p className="text-[11px] text-emerald-100 font-medium leading-none">Your Cart Subtotal</p>
+                <p className="text-[11px] text-amber-100 font-medium leading-none">Your Cart Subtotal</p>
                 <p className="text-xs font-extrabold text-white leading-tight">
                   {formatCurrency(subtotal)}
                 </p>
               </div>
             </div>
 
-            <div className="flex items-center gap-1.5 text-xs font-extrabold bg-white text-emerald-800 px-3 py-1.5 rounded-xl shadow-sm">
+            <div className="flex items-center gap-1.5 text-xs font-extrabold bg-white text-orange-950 px-3 py-1.5 rounded-xl shadow-xs">
               <span>View Cart</span>
               <span>➔</span>
             </div>
@@ -53,7 +53,7 @@ export function MobileNav() {
             href="/"
             className={`flex flex-col items-center justify-center gap-0.5 py-1 px-3 rounded-xl transition-all active:scale-90 ${
               pathname === "/"
-                ? "text-emerald-600 dark:text-emerald-400 font-extrabold"
+                ? "text-orange-600 dark:text-orange-400 font-extrabold"
                 : "text-slate-500 dark:text-slate-400"
             }`}
           >
@@ -66,7 +66,7 @@ export function MobileNav() {
             href="/products"
             className={`flex flex-col items-center justify-center gap-0.5 py-1 px-3 rounded-xl transition-all active:scale-90 ${
               pathname.startsWith("/products") && !pathname.includes("/products/")
-                ? "text-emerald-600 dark:text-emerald-400 font-extrabold"
+                ? "text-orange-600 dark:text-orange-400 font-extrabold"
                 : "text-slate-500 dark:text-slate-400"
             }`}
           >
@@ -83,7 +83,7 @@ export function MobileNav() {
             <div className="relative">
               <ShoppingBag className="w-5 h-5" />
               {itemCount > 0 && (
-                <span className="absolute -top-1 -right-2 bg-rose-500 text-white font-bold text-[9px] w-4 h-4 rounded-full flex items-center justify-center animate-pulse-soft shadow-xs">
+                <span className="absolute -top-1 -right-2 bg-orange-600 text-white font-bold text-[9px] w-4 h-4 rounded-full flex items-center justify-center animate-pulse-soft shadow-xs">
                   {itemCount}
                 </span>
               )}
@@ -96,7 +96,7 @@ export function MobileNav() {
             href="/orders"
             className={`flex flex-col items-center justify-center gap-0.5 py-1 px-3 rounded-xl transition-all active:scale-90 ${
               pathname.startsWith("/orders")
-                ? "text-emerald-600 dark:text-emerald-400 font-extrabold"
+                ? "text-orange-600 dark:text-orange-400 font-extrabold"
                 : "text-slate-500 dark:text-slate-400"
             }`}
           >
@@ -109,7 +109,7 @@ export function MobileNav() {
             href={user ? "/account/profile" : "/auth/login"}
             className={`flex flex-col items-center justify-center gap-0.5 py-1 px-3 rounded-xl transition-all active:scale-90 ${
               pathname.startsWith("/account") || pathname.startsWith("/auth")
-                ? "text-emerald-600 dark:text-emerald-400 font-extrabold"
+                ? "text-orange-600 dark:text-orange-400 font-extrabold"
                 : "text-slate-500 dark:text-slate-400"
             }`}
           >

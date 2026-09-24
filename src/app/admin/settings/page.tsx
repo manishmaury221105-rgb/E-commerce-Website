@@ -9,16 +9,16 @@ import { subscribeToStoreSettings, updateStoreSettings } from "@/lib/firestore-s
 export default function AdminSettingsPage() {
   const { success, error } = useToast();
 
-  const [shopName, setShopName] = useState("FreshMart Local Supermarket");
+  const [shopName, setShopName] = useState("चैतन्य श्री (Chaitanya Shree) - Wedding & Festive Collection");
   const [phone, setPhone] = useState("+91 73804 92118");
   const [whatsapp, setWhatsapp] = useState("+917380492118");
-  const [email, setEmail] = useState("help@freshmart.local");
-  const [address, setAddress] = useState("Shop #14, Main Market Square, Near Central Clock Tower");
+  const [email, setEmail] = useState("info@chaitanyashree.in");
+  const [address, setAddress] = useState("Shop #14, Royal Heritage Wedding Complex, Main Bazaar");
   const [currency, setCurrency] = useState("₹");
-  const [freeDeliveryMin, setFreeDeliveryMin] = useState("499");
-  const [deliveryFee, setDeliveryFee] = useState("40");
-  const [announcement, setAnnouncement] = useState("⚡ Super Fast Local Delivery in under 45 mins! Use code WELCOME10 for 10% OFF");
-  const [openHours, setOpenHours] = useState("Mon - Sun: 7:00 AM - 10:30 PM");
+  const [freeDeliveryMin, setFreeDeliveryMin] = useState("999");
+  const [deliveryFee, setDeliveryFee] = useState("50");
+  const [announcement, setAnnouncement] = useState("✨ चैतन्य श्री वेडिंग स्पेशल: सभी शादी कलेक्शन्स पर 20% तक छूट! Use code SHUBHVIVAH");
+  const [openHours, setOpenHours] = useState("Mon - Sun: 9:00 AM - 10:00 PM");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 

@@ -36,7 +36,7 @@ export default function RegisterPage() {
     setLoading(false);
 
     if (res.success) {
-      success("Account created successfully! Welcome to FreshMart.");
+      success("Account created successfully! Welcome to चैतन्य श्री.");
       router.push("/");
     } else {
       error(res.error || "Failed to create account");
@@ -47,14 +47,16 @@ export default function RegisterPage() {
     <div className="py-10 max-w-md mx-auto space-y-6">
       <div className="bg-white p-7 sm:p-9 rounded-3xl border border-slate-200/80 shadow-xl space-y-6">
         <div className="text-center space-y-2">
-          <div className="w-12 h-12 rounded-2xl bg-emerald-600 text-white flex items-center justify-center mx-auto shadow-md shadow-emerald-600/20">
-            <ShoppingBag className="w-6 h-6" />
-          </div>
+          <img
+            src="/logo.png"
+            alt="चैतन्य श्री"
+            className="h-14 w-auto object-contain mx-auto"
+          />
           <h1 className="font-heading font-extrabold text-2xl text-slate-900 tracking-tight">
             Create Customer Account
           </h1>
           <p className="text-xs text-slate-500">
-            Enjoy 10% off your first order with code WELCOME10
+            Enjoy exclusive vivah discounts with code SHUBHVIVAH
           </p>
         </div>
 
@@ -68,7 +70,7 @@ export default function RegisterPage() {
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder="Rahul Sharma"
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2 text-xs focus:bg-white focus:outline-none focus:border-emerald-500"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2 text-xs focus:bg-white focus:outline-none focus:border-orange-500"
               />
               <User className="w-4 h-4 text-slate-400 absolute left-3 top-2.5 pointer-events-none" />
             </div>
@@ -83,7 +85,7 @@ export default function RegisterPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="name@email.com"
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2 text-xs focus:bg-white focus:outline-none focus:border-emerald-500"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2 text-xs focus:bg-white focus:outline-none focus:border-orange-500"
               />
               <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-2.5 pointer-events-none" />
             </div>
@@ -97,7 +99,7 @@ export default function RegisterPage() {
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 placeholder="+91 98765 43210"
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2 text-xs focus:bg-white focus:outline-none focus:border-emerald-500"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2 text-xs focus:bg-white focus:outline-none focus:border-orange-500"
               />
               <Phone className="w-4 h-4 text-slate-400 absolute left-3 top-2.5 pointer-events-none" />
             </div>
@@ -112,7 +114,7 @@ export default function RegisterPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="At least 6 characters"
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2 text-xs focus:bg-white focus:outline-none focus:border-emerald-500"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2 text-xs focus:bg-white focus:outline-none focus:border-orange-500"
               />
               <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-2.5 pointer-events-none" />
             </div>
@@ -121,9 +123,9 @@ export default function RegisterPage() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 text-xs sm:text-sm shadow-md shadow-emerald-600/20 active:scale-95 transition-all mt-2"
+            className="w-full bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 disabled:opacity-50 text-white font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 text-xs sm:text-sm shadow-md shadow-orange-600/20 active:scale-95 transition-all mt-2"
           >
-            {loading ? "Creating account..." : "Sign Up & Start Shopping"}
+            {loading ? "Creating account..." : "Sign Up & Start Exploring"}
             <ArrowRight className="w-4 h-4" />
           </button>
         </form>
@@ -139,7 +141,7 @@ export default function RegisterPage() {
 
         <div className="text-center text-xs text-slate-500 pt-2 border-t border-slate-100">
           Already have an account?{" "}
-          <Link href="/auth/login" className="font-bold text-emerald-600 hover:underline">
+          <Link href="/auth/login" className="font-bold text-orange-600 hover:underline">
             Sign In
           </Link>
         </div>

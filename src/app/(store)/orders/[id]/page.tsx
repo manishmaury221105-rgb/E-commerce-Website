@@ -263,7 +263,7 @@ export default function OrderDetailPage() {
           </div>
           <p className="font-bold text-sm text-slate-900 dark:text-white">{order.deliverySlot || "⚡ 45-Min Express"}</p>
           <p className="text-xs text-slate-500 dark:text-slate-400">
-            Dispatch direct from FreshMart Local Shop #14
+            Dispatch direct from चैतन्य श्री Store
           </p>
           {order.notes && (
             <p className="text-xs text-amber-800 dark:text-amber-300 bg-amber-50 dark:bg-amber-950/40 p-2 rounded-xl mt-2 border border-amber-200 dark:border-amber-800/60">

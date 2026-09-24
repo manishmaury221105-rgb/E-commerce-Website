@@ -309,7 +309,7 @@ export default function CartPage() {
             <div className="space-y-2.5 pt-2">
               <button
                 onClick={() => router.push("/checkout")}
-                className="w-full bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white font-bold py-3.5 px-4 rounded-2xl flex items-center justify-center gap-2 text-sm shadow-md shadow-emerald-600/20 transition-all"
+                className="w-full bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 active:scale-95 text-white font-bold py-3.5 px-4 rounded-2xl flex items-center justify-center gap-2 text-sm shadow-md shadow-orange-600/20 transition-all"
               >
                 <span>Proceed to Checkout</span>
                 <ArrowRight className="w-4 h-4" />
@@ -318,9 +318,9 @@ export default function CartPage() {
               <a
                 href={generateWhatsAppSupportLink(
                   "+917380492118",
-                  `Hi FreshMart, here is my cart order:\n${items
+                  `नमस्ते चैतन्य श्री, here is my cart order:\n${items
                     .map((i) => `• ${i.name} (${i.unit}) x ${i.quantity} = ₹${i.price * i.quantity}`)
-                    .join("\n")}\n\n*Total:* ₹${total}`
+                    .join("\n")}\n\n*Total:* ₹${total}\n\nPlease confirm availability. Dhanyawad!`
                 )}
                 target="_blank"
                 rel="noopener noreferrer"
@@ -333,11 +333,11 @@ export default function CartPage() {
 
             <div className="pt-2 flex items-center justify-center gap-4 text-[11px] text-slate-400">
               <span className="flex items-center gap-1">
-                <ShieldCheck className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" /> Secure Checkout
+                <ShieldCheck className="w-3.5 h-3.5 text-orange-600 dark:text-orange-400" /> Secure Checkout
               </span>
               <span>•</span>
               <span className="flex items-center gap-1">
-                <Truck className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" /> 45-Min Express
+                <Truck className="w-3.5 h-3.5 text-orange-600 dark:text-orange-400" /> Express Dispatch
               </span>
             </div>
           </div>

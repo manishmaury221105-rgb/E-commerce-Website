@@ -28,9 +28,9 @@ async function getProductData(slug: string) {
 
 export async function generateMetadata({ params }: { params: { slug: string } }) {
   const data = await getProductData(params.slug);
-  if (!data?.product) return { title: "Product Not Found | FreshMart" };
+  if (!data?.product) return { title: "Product Not Found | चैतन्य श्री" };
   return {
-    title: `${data.product.name} | FreshMart Local Shop`,
+    title: `${data.product.name} | चैतन्य श्री`,
     description: data.product.shortDescription || data.product.description.slice(0, 160),
   };
 }

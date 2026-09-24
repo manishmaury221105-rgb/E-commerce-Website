@@ -6,50 +6,52 @@ export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
   maximumScale: 5,
-  themeColor: "#16a34a",
+  themeColor: "#ea580c",
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://freshmart-ecommerce.vercel.app"),
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "https://chaitanya-shree.vercel.app"),
   title: {
-    default: "FreshMart | Online Grocery & Local Supermarket",
-    template: "%s | FreshMart Local Shop",
+    default: "चैतन्य श्री | Complete Wedding & Festive Collections",
+    template: "%s | चैतन्य श्री",
   },
   description:
-    "Order fresh farm fruits, crisp vegetables, dairy, bakery, daily staples, household essentials with lightning-fast 45-minute local delivery.",
+    "चैतन्य श्री - Shubh Vivah, Bridal Lehengas, Royal Groom Sherwanis, Wedding Cards, Traditional Pooja Samagri & Bridal Jewellery.",
   keywords: [
-    "e-commerce",
-    "local grocery delivery",
-    "fresh fruits",
-    "farm vegetables",
-    "online supermarket",
-    "cash on delivery",
-    "express delivery",
+    "wedding store",
+    "bridal lehengas",
+    "sherwani",
+    "chaitanya shree",
+    "चैतन्य श्री",
+    "wedding cards",
+    "pooja samagri",
+    "bridal jewellery",
+    "shubh vivah",
   ],
-  authors: [{ name: "FreshMart" }],
+  authors: [{ name: "चैतन्य श्री" }],
   openGraph: {
     type: "website",
     locale: "en_IN",
     url: "/",
-    siteName: "FreshMart Local Supermarket",
-    title: "FreshMart | Online Grocery & Daily Staples Delivery",
-    description: "Order fresh farm fruits, vegetables & groceries with express 45-min delivery.",
+    siteName: "चैतन्य श्री Wedding Store",
+    title: "चैतन्य श्री | Complete Wedding & Festive Collections",
+    description: "Explore bridal lehengas, royal sherwanis, wedding cards & pooja samagri.",
     images: [
       {
-        url: "https://images.unsplash.com/photo-1542838132-92c53300491e?w=1200",
+        url: "/logo.png",
         width: 1200,
         height: 630,
-        alt: "FreshMart Supermarket",
+        alt: "चैतन्य श्री",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "FreshMart | Local Supermarket",
-    description: "Order fresh groceries with express local delivery.",
+    title: "चैतन्य श्री | Wedding & Festive Collection",
+    description: "Handcrafted bridal & groom wear, wedding accessories and cards.",
   },
   icons: {
-    icon: "/favicon.ico",
+    icon: "/logo.png",
   },
 };
 
@@ -60,7 +62,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="scroll-smooth">
-      <body className="min-h-screen bg-slate-50 text-slate-900 antialiased flex flex-col selection:bg-emerald-500 selection:text-white">
+      <body className="min-h-screen bg-slate-50 text-slate-900 antialiased flex flex-col selection:bg-orange-500 selection:text-white">
         <Providers>{children}</Providers>
       </body>
     </html>

@@ -33,7 +33,7 @@ export function HeroBannerSlider({ banners }: HeroBannerSliderProps) {
   const current = banners[currentSlide];
 
   return (
-    <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden shadow-xl shadow-emerald-950/10 border border-slate-200/80 dark:border-slate-800 bg-slate-900 group">
+    <div className="relative rounded-2xl sm:rounded-3xl overflow-hidden shadow-xl shadow-orange-950/10 border border-orange-200/80 dark:border-slate-800 bg-slate-900 group">
       {/* Background Banner Image */}
       <div className="relative h-[250px] sm:h-[340px] md:h-[440px] w-full overflow-hidden">
         <img
@@ -48,7 +48,7 @@ export function HeroBannerSlider({ banners }: HeroBannerSliderProps) {
         <div className="absolute inset-0 max-w-7xl mx-auto px-4 sm:px-10 md:px-14 flex items-center">
           <div className="max-w-xl space-y-2.5 sm:space-y-4 text-white">
             {current.tag && (
-              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full bg-emerald-500/20 border border-emerald-400/30 text-emerald-300 text-[10px] sm:text-xs font-bold uppercase tracking-wider backdrop-blur-md">
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full bg-orange-500/20 border border-orange-400/30 text-amber-300 text-[10px] sm:text-xs font-bold uppercase tracking-wider backdrop-blur-md">
                 <Zap className="w-3 h-3 text-amber-400" />
                 <span>{current.tag}</span>
               </div>
@@ -67,26 +67,26 @@ export function HeroBannerSlider({ banners }: HeroBannerSliderProps) {
             <div className="pt-1 sm:pt-2 flex items-center gap-2 sm:gap-3">
               <Link
                 href={current.link || "/products"}
-                className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-4 sm:px-6 py-2 sm:py-3 rounded-xl sm:rounded-2xl flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm shadow-lg shadow-emerald-600/30 active:scale-95 transition-all"
+                className="bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white font-bold px-4 sm:px-6 py-2 sm:py-3 rounded-xl sm:rounded-2xl flex items-center gap-1.5 sm:gap-2 text-xs sm:text-sm shadow-lg shadow-orange-600/30 active:scale-95 transition-all"
               >
-                <span>{current.buttonText || "Shop Now"}</span>
+                <span>{current.buttonText || "Explore Collection"}</span>
                 <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               </Link>
               <Link
                 href="/products?deal=true"
                 className="bg-white/10 hover:bg-white/20 text-white font-semibold px-3 sm:px-5 py-2 sm:py-3 rounded-xl sm:rounded-2xl text-xs sm:text-sm border border-white/20 backdrop-blur-md transition-colors"
               >
-                Today's Deals
+                Vivah Offers
               </Link>
             </div>
 
             {/* Micro value props */}
             <div className="pt-2 hidden sm:flex items-center gap-6 text-slate-300 text-xs font-medium">
               <span className="flex items-center gap-1.5">
-                <Clock className="w-4 h-4 text-emerald-400" /> 45-Min Fast Delivery
+                <Clock className="w-4 h-4 text-orange-400" /> Express Dispatch
               </span>
               <span className="flex items-center gap-1.5">
-                <ShieldCheck className="w-4 h-4 text-emerald-400" /> 100% Quality Checked
+                <ShieldCheck className="w-4 h-4 text-orange-400" /> 100% Quality Checked
               </span>
             </div>
           </div>
@@ -118,7 +118,7 @@ export function HeroBannerSlider({ banners }: HeroBannerSliderProps) {
                 key={idx}
                 onClick={() => setCurrentSlide(idx)}
                 className={`h-1.5 rounded-full transition-all duration-300 ${
-                  idx === currentSlide ? "w-6 bg-emerald-500" : "w-1.5 bg-white/40 hover:bg-white/70"
+                  idx === currentSlide ? "w-6 bg-orange-500" : "w-1.5 bg-white/40 hover:bg-white/70"
                 }`}
                 aria-label={`Go to slide ${idx + 1}`}
               />

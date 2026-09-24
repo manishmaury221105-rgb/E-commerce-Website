@@ -59,14 +59,16 @@ function LoginForm() {
       {/* Login Card */}
       <div className="bg-white p-7 sm:p-9 rounded-3xl border border-slate-200/80 shadow-xl space-y-6">
         <div className="text-center space-y-2">
-          <div className="w-12 h-12 rounded-2xl bg-emerald-600 text-white flex items-center justify-center mx-auto shadow-md shadow-emerald-600/20">
-            <ShoppingBag className="w-6 h-6" />
-          </div>
+          <img
+            src="/logo.png"
+            alt="चैतन्य श्री"
+            className="h-14 w-auto object-contain mx-auto"
+          />
           <h1 className="font-heading font-extrabold text-2xl text-slate-900 tracking-tight">
-            Sign In to FreshMart
+            Sign In to <span className="text-orange-600">चैतन्य श्री</span>
           </h1>
           <p className="text-xs text-slate-500">
-            Access your orders, saved addresses & express checkout
+            Access your wedding orders, saved addresses & custom bookings
           </p>
         </div>
 
@@ -89,7 +91,7 @@ function LoginForm() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="manish@2211 or your email"
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2.5 text-xs focus:bg-white focus:outline-none focus:border-emerald-500"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2.5 text-xs focus:bg-white focus:outline-none focus:border-orange-500"
               />
               <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-3 pointer-events-none" />
             </div>
@@ -106,7 +108,7 @@ function LoginForm() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2.5 text-xs focus:bg-white focus:outline-none focus:border-emerald-500"
+                className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2.5 text-xs focus:bg-white focus:outline-none focus:border-orange-500"
               />
               <Lock className="w-4 h-4 text-slate-400 absolute left-3 top-3 pointer-events-none" />
             </div>
@@ -115,7 +117,7 @@ function LoginForm() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 text-xs sm:text-sm shadow-md shadow-emerald-600/20 active:scale-95 transition-all"
+            className="w-full bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 disabled:opacity-50 text-white font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 text-xs sm:text-sm shadow-md shadow-orange-600/20 active:scale-95 transition-all"
           >
             {loading ? "Signing in..." : "Sign In"}
             <ArrowRight className="w-4 h-4" />
@@ -133,7 +135,7 @@ function LoginForm() {
 
         <div className="text-center text-xs text-slate-500 pt-2 border-t border-slate-100">
           Don't have an account yet?{" "}
-          <Link href="/auth/register" className="font-bold text-emerald-600 hover:underline">
+          <Link href="/auth/register" className="font-bold text-orange-600 hover:underline">
             Create Account
           </Link>
         </div>
@@ -147,7 +149,7 @@ export default function LoginPage() {
     <Suspense
       fallback={
         <div className="py-20 text-center">
-          <div className="w-8 h-8 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin mx-auto" />
+          <div className="w-8 h-8 border-4 border-orange-600 border-t-transparent rounded-full animate-spin mx-auto" />
         </div>
       }
     >
