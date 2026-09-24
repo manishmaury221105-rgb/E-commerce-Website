@@ -505,28 +505,6 @@ export default function EditProductPage() {
               </div>
             </div>
           </div>
-
-          <div className="flex flex-wrap gap-6 pt-2 border-t border-slate-800">
-            <label className="flex items-center gap-2 cursor-pointer select-none text-xs text-slate-200">
-              <input
-                type="checkbox"
-                checked={isFeatured}
-                onChange={(e) => setIsFeatured(e.target.checked)}
-                className="accent-emerald-600 w-4 h-4"
-              />
-              <span className="font-semibold">Featured on Homepage</span>
-            </label>
-
-            <label className="flex items-center gap-2 cursor-pointer select-none text-xs text-slate-200">
-              <input
-                type="checkbox"
-                checked={isDailyDeal}
-                onChange={(e) => setIsDailyDeal(e.target.checked)}
-                className="accent-amber-500 w-4 h-4"
-              />
-              <span className="font-semibold text-amber-400">Mark as Deal of the Day (Flash Sale)</span>
-            </label>
-          </div>
         </div>
 
         {/* Submit */}
