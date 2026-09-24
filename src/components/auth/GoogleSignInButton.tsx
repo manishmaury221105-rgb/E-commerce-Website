@@ -89,9 +89,23 @@ export default function GoogleSignInButton({
       </button>
 
       {errorDetails && (
-        <p className="text-[11px] text-red-600 bg-red-50 p-2 rounded-lg border border-red-200">
-          {errorDetails}
-        </p>
+        <div className="text-[11px] text-amber-900 bg-amber-50 p-3 rounded-xl border border-amber-200 space-y-1.5 leading-relaxed">
+          <div className="font-semibold flex items-center gap-1.5 text-amber-800">
+            <span>⚠️</span>
+            <span>Google Sign-In Domain Setup Required</span>
+          </div>
+          <p className="text-slate-600">{errorDetails}</p>
+          <div className="pt-1">
+            <a
+              href="https://console.firebase.google.com/project/my-ecommerce-e8ba0/authentication/settings"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1 text-xs font-bold text-orange-700 bg-orange-100/80 hover:bg-orange-200/80 px-2.5 py-1 rounded-lg transition-colors underline"
+            >
+              Open Firebase Settings ↗
+            </a>
+          </div>
+        </div>
       )}
     </div>
   );

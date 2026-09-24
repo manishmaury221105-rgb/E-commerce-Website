@@ -43,8 +43,10 @@ export async function findUserByEmail(email: string): Promise<FirestoreUserData 
       if (snap.empty) {
         return createAdminDemoUser();
       }
-    } else if (snap.empty && cleanEmail === "admin@localshop.com") {
+    } else if (snap.empty && (cleanEmail === "admin@localshop.com" || cleanEmail === "admin@chaitanya.com")) {
       return createAdminDemoUser();
+    } else if (snap.empty && cleanEmail === "customer@chaitanya.com") {
+      return createCustomerDemoUser();
     }
 
     if (snap.empty) {
@@ -56,6 +58,26 @@ export async function findUserByEmail(email: string): Promise<FirestoreUserData 
   } catch (error) {
     console.error("findUserByEmail error:", error);
     return null;
+  }
+}
+
+async function createCustomerDemoUser(): Promise<FirestoreUserData> {
+  const passwordHash = await hashPassword("customer123");
+  const custData = {
+    name: "Wedding Guest (Demo)",
+    email: "customer@chaitanya.com",
+    passwordHash,
+    phone: "+91 98765 43210",
+    role: "CUSTOMER" as UserRole,
+    addresses: [],
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  };
+  try {
+    const res = await addDoc(collection(db, "users"), custData);
+    return { id: res.id, ...custData };
+  } catch (e) {
+    return { id: "demo-customer-id", ...custData };
   }
 }
 

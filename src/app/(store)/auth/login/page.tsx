@@ -130,6 +130,37 @@ function LoginForm() {
         {/* Firebase Google Auth */}
         <GoogleSignInButton redirectTo={redirectUrl || "/orders"} text="Sign in with Google" />
 
+        {/* Quick 1-Click Login Helper */}
+        <div className="bg-slate-50 border border-slate-200 rounded-2xl p-3 space-y-2">
+          <div className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider text-center">
+            ⚡ Quick 1-Click Login (Demo / Admin)
+          </div>
+          <div className="grid grid-cols-2 gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                setEmail("manish@2211");
+                setPassword("m@221105");
+              }}
+              className="px-2.5 py-2 bg-white hover:bg-orange-50 border border-slate-200 hover:border-orange-300 rounded-xl text-left text-[11px] transition-all shadow-sm group"
+            >
+              <div className="font-bold text-slate-800 group-hover:text-orange-600">👑 Admin Login</div>
+              <div className="text-slate-400 text-[10px]">manish@2211</div>
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setEmail("customer@chaitanya.com");
+                setPassword("customer123");
+              }}
+              className="px-2.5 py-2 bg-white hover:bg-teal-50 border border-slate-200 hover:border-teal-300 rounded-xl text-left text-[11px] transition-all shadow-sm group"
+            >
+              <div className="font-bold text-slate-800 group-hover:text-teal-700">🛍️ Customer Demo</div>
+              <div className="text-slate-400 text-[10px]">Auto-fill customer</div>
+            </button>
+          </div>
+        </div>
+
         <div className="text-center text-xs text-slate-500 pt-2 border-t border-slate-100">
           Don't have an account yet?{" "}
           <Link href="/auth/register" className="font-bold text-orange-600 hover:underline">
