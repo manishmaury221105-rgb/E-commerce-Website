@@ -12,60 +12,69 @@ import { Product, Banner, Category } from "@/types";
 export const revalidate = 0; // Dynamic data
 
 async function getHomePageData() {
-  const [banners, categories, products] = await Promise.all([
-    prisma.banner.findMany({
-      where: { isActive: true },
-      orderBy: { order: "asc" },
-    }),
-    prisma.category.findMany({
-      orderBy: { order: "asc" },
-      include: {
-        _count: { select: { products: true } },
-      },
-    }),
-    prisma.product.findMany({
-      orderBy: { createdAt: "desc" },
-      include: {
-        category: true,
-      },
-    }),
-  ]);
+  try {
+    const [banners, categories, products] = await Promise.all([
+      prisma.banner.findMany({
+        where: { isActive: true },
+        orderBy: { order: "asc" },
+      }),
+      prisma.category.findMany({
+        orderBy: { order: "asc" },
+        include: {
+          _count: { select: { products: true } },
+        },
+      }),
+      prisma.product.findMany({
+        orderBy: { createdAt: "desc" },
+        include: {
+          category: true,
+        },
+      }),
+    ]);
 
-  const parsedBanners: Banner[] = banners.map((b) => ({
-    ...b,
-  }));
+    const parsedBanners: Banner[] = banners.map((b) => ({
+      ...b,
+    }));
 
-  const parsedCategories: Category[] = categories.map((c) => ({
-    ...c,
-    productCount: c._count.products,
-  }));
+    const parsedCategories: Category[] = categories.map((c) => ({
+      ...c,
+      productCount: c._count?.products || 0,
+    }));
 
-  const parsedProducts: Product[] = products.map((p) => ({
-    ...p,
-    images: Array.isArray(p.images)
-      ? p.images
-      : typeof p.images === "string"
-      ? JSON.parse(p.images || "[]")
-      : [],
-    dealEndsAt: p.dealEndsAt ? p.dealEndsAt.toISOString() : null,
-    createdAt: p.createdAt.toISOString(),
-    updatedAt: p.updatedAt.toISOString(),
-    category: p.category
-      ? {
-          id: p.category.id,
-          name: p.category.name,
-          slug: p.category.slug,
-          isFeatured: p.category.isFeatured,
-          order: p.category.order,
-        }
-      : undefined,
-  }));
+    const parsedProducts: Product[] = products.map((p) => ({
+      ...p,
+      images: Array.isArray(p.images)
+        ? p.images
+        : typeof p.images === "string"
+        ? JSON.parse(p.images || "[]")
+        : [],
+      dealEndsAt: p.dealEndsAt ? p.dealEndsAt.toISOString() : null,
+      createdAt: p.createdAt.toISOString(),
+      updatedAt: p.updatedAt.toISOString(),
+      category: p.category
+        ? {
+            id: p.category.id,
+            name: p.category.name,
+            slug: p.category.slug,
+            isFeatured: p.category.isFeatured,
+            order: p.category.order,
+          }
+        : undefined,
+    }));
 
-  return {
-    banners: parsedBanners,
-    categories: parsedCategories,
-    products: parsedProducts,
-  };
+    return {
+      banners: parsedBanners,
+      categories: parsedCategories,
+      products: parsedProducts,
+    };
+  } catch (error) {
+    console.error("Home page data fetch error:", error);
+    return {
+      banners: [],
+      categories: [],
+      products: [],
+    };
+  }
 }
 
 export default async function HomePage() {

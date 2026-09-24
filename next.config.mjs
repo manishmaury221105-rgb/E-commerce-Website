@@ -4,6 +4,11 @@ if (!process.env.DATABASE_URL || process.env.DATABASE_URL.trim() === "") {
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  experimental: {
+    outputFileTracingIncludes: {
+      "/**": ["./prisma/**/*"],
+    },
+  },
   images: {
     remotePatterns: [
       {
