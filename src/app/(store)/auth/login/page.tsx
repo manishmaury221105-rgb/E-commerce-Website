@@ -80,14 +80,15 @@ function LoginForm() {
         {/* Login Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">Email Address</label>
+            <label className="block text-xs font-semibold text-slate-700 mb-1">Email / Admin ID</label>
             <div className="relative">
               <input
-                type="email"
+                type="text"
+                autoComplete="username"
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="name@email.com"
+                placeholder="manish@2211 or your email"
                 className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-9 pr-3 py-2.5 text-xs focus:bg-white focus:outline-none focus:border-emerald-500"
               />
               <Mail className="w-4 h-4 text-slate-400 absolute left-3 top-3 pointer-events-none" />

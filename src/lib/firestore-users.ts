@@ -30,16 +30,27 @@ export interface FirestoreUserData {
 
 export async function findUserByEmail(email: string): Promise<FirestoreUserData | null> {
   try {
+    const cleanEmail = email.toLowerCase().trim();
     const colRef = collection(db, "users");
-    const q = query(colRef, where("email", "==", email.toLowerCase().trim()), limit(1));
-    const snap = await getDocs(q);
-    if (snap.empty) {
-      // If demo admin is queried and not found, auto-create
-      if (email.toLowerCase().trim() === "admin@localshop.com") {
+    
+    // Check exact email or short variant
+    let q = query(colRef, where("email", "==", cleanEmail), limit(1));
+    let snap = await getDocs(q);
+    
+    if (snap.empty && (cleanEmail === "manish@2211" || cleanEmail === "manish@2211.com")) {
+      q = query(colRef, where("email", "in", ["manish@2211", "manish@2211.com"]), limit(1));
+      snap = await getDocs(q);
+      if (snap.empty) {
         return createAdminDemoUser();
       }
+    } else if (snap.empty && cleanEmail === "admin@localshop.com") {
+      return createAdminDemoUser();
+    }
+
+    if (snap.empty) {
       return null;
     }
+
     const d = snap.docs[0];
     return { id: d.id, ...d.data() } as FirestoreUserData;
   } catch (error) {
@@ -272,12 +283,12 @@ export function subscribeToCustomerAddresses(
 }
 
 async function createAdminDemoUser(): Promise<FirestoreUserData> {
-  const passwordHash = await hashPassword("Admin@12345");
+  const passwordHash = await hashPassword("m@221105");
   const adminData = {
-    name: "Shop Manager (Admin)",
-    email: "admin@localshop.com",
+    name: "Manish Maurya (Admin)",
+    email: "manish@2211.com",
     passwordHash,
-    phone: "+91 98765 43210",
+    phone: "+91 73804 92118",
     role: "ADMIN" as UserRole,
     addresses: [],
     createdAt: new Date().toISOString(),
