@@ -80,9 +80,7 @@ export async function getCategories(): Promise<Category[]> {
     const colRef = collection(db, "categories");
     const snap = await getDocs(colRef);
     if (snap.empty) {
-      await seedDefaultFirestoreData();
-      const freshSnap = await getDocs(colRef);
-      return freshSnap.docs.map((d) => ({ id: d.id, ...d.data() } as Category));
+      return [];
     }
     
     // Sort by order
@@ -153,19 +151,14 @@ export async function deleteCategory(id: string): Promise<boolean> {
     const prodSnap = await getDocs(q);
 
     if (!prodSnap.empty) {
-      // Find fallback category
-      const allCats = await getCategories();
-      const fallbackCat = allCats.find((c) => c.id !== id);
-      const fallbackId = fallbackCat ? fallbackCat.id : "general";
-
       const batch = writeBatch(db);
       prodSnap.docs.forEach((pDoc) => {
-        batch.update(pDoc.ref, { categoryId: fallbackId });
+        batch.update(pDoc.ref, { categoryId: "" });
       });
       await batch.commit();
     }
 
-    // 2. Delete the category
+    // 2. Delete the category permanently
     await deleteDoc(doc(db, "categories", id));
     return true;
   } catch (error) {
@@ -195,9 +188,7 @@ export async function getProducts(filters: ProductQueryFilters = {}): Promise<Pr
     const snap = await getDocs(colRef);
 
     if (snap.empty) {
-      await seedDefaultFirestoreData();
-      const freshSnap = await getDocs(colRef);
-      return filterAndSortProducts(freshSnap.docs.map((d) => ({ id: d.id, ...d.data() } as Product)), filters);
+      return [];
     }
 
     let products: Product[] = snap.docs.map((d) => ({ id: d.id, ...d.data() } as Product));
@@ -344,9 +335,7 @@ export async function getBanners(activeOnly: boolean = false): Promise<Banner[]>
     const colRef = collection(db, "banners");
     const snap = await getDocs(colRef);
     if (snap.empty) {
-      await seedDefaultFirestoreData();
-      const freshSnap = await getDocs(colRef);
-      return freshSnap.docs.map((d) => ({ id: d.id, ...d.data() } as Banner));
+      return [];
     }
 
     let banners = snap.docs.map((d) => ({ id: d.id, ...d.data() } as Banner));
@@ -542,9 +531,7 @@ export async function getCoupons(): Promise<Coupon[]> {
     const colRef = collection(db, "coupons");
     const snap = await getDocs(colRef);
     if (snap.empty) {
-      await seedDefaultFirestoreData();
-      const freshSnap = await getDocs(colRef);
-      return freshSnap.docs.map((d) => ({ id: d.id, ...d.data() } as Coupon));
+      return [];
     }
     return snap.docs.map((d) => ({ id: d.id, ...d.data() } as Coupon));
   } catch (error) {
