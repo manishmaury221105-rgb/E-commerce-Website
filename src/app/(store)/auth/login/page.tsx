@@ -42,13 +42,10 @@ function LoginForm() {
 
     if (res.success) {
       success(`Welcome back, ${res.user?.name}!`);
-      if (redirectUrl) {
-        router.push(redirectUrl);
-      } else if (res.user?.role === "ADMIN" || res.user?.role === "STAFF") {
-        router.push("/admin");
-      } else {
-        router.push("/orders");
-      }
+      const target = redirectUrl || (res.user?.role === "ADMIN" || res.user?.role === "STAFF" ? "/admin" : "/orders");
+      setTimeout(() => {
+        window.location.href = target;
+      }, 500);
     } else {
       error(res.error || "Invalid email or password");
     }
