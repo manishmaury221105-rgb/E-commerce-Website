@@ -20,6 +20,7 @@ import { formatCurrency, formatDate, generateWhatsAppOrderSummaryLink } from "@/
 import { ORDER_STATUS_LABELS, PAYMENT_STATUS_LABELS, PAYMENT_METHOD_LABELS } from "@/lib/constants";
 import { useToast } from "@/context/ToastContext";
 import { Order, OrderStatus } from "@/types";
+import { subscribeToOrder } from "@/lib/firestore-service";
 
 export default function AdminOrderDetailPage() {
   const params = useParams();
@@ -35,22 +36,19 @@ export default function AdminOrderDetailPage() {
   const [selectedPaymentStatus, setSelectedPaymentStatus] = useState<string>("PENDING");
   const [customNote, setCustomNote] = useState("");
 
-  const fetchOrder = () => {
-    fetch(`/api/orders/${orderId}`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.order) {
-          setOrder(data.order);
-          setSelectedStatus(data.order.orderStatus);
-          setSelectedPaymentStatus(data.order.paymentStatus);
-        }
-      })
-      .catch((err) => console.error(err))
-      .finally(() => setLoading(false));
-  };
-
   useEffect(() => {
-    fetchOrder();
+    const unsubscribe = subscribeToOrder(orderId, (liveOrder) => {
+      if (liveOrder) {
+        setOrder(liveOrder);
+        setSelectedStatus(liveOrder.orderStatus);
+        setSelectedPaymentStatus(liveOrder.paymentStatus);
+      }
+      setLoading(false);
+    });
+
+    return () => {
+      unsubscribe();
+    };
   }, [orderId]);
 
   const handleUpdate = async (e: React.FormEvent) => {
@@ -71,7 +69,6 @@ export default function AdminOrderDetailPage() {
       if (res.ok) {
         success("Order status and tracking history updated!");
         setCustomNote("");
-        fetchOrder();
       } else {
         error("Failed to update order");
       }

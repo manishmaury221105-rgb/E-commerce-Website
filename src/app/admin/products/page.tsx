@@ -17,10 +17,11 @@ import {
 import { formatCurrency } from "@/lib/utils";
 import { useToast } from "@/context/ToastContext";
 import { Product, Category } from "@/types";
+import { subscribeToProducts, subscribeToCategories, updateProductStockSafely } from "@/lib/firestore-service";
 
 export default function AdminProductsPage() {
   const { success, error } = useToast();
-  const [products, setProducts] = useState<Product[]>([]);
+  const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
@@ -48,36 +49,40 @@ export default function AdminProductsPage() {
     { label: "🧼 Dishwash Soap", url: "https://images.unsplash.com/photo-1585421514284-efb74c2b69ba?w=800" },
   ];
 
-  const fetchProducts = () => {
-    setLoading(true);
-    const params = new URLSearchParams();
-    if (search.trim()) params.set("search", search.trim());
-    if (selectedCategory) params.set("category", selectedCategory);
-
-    fetch(`/api/products?${params.toString()}`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.products) setProducts(data.products);
-      })
-      .catch((err) => console.error(err))
-      .finally(() => setLoading(false));
-  };
-
   useEffect(() => {
-    fetch("/api/categories")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.categories) setCategories(data.categories);
-      });
+    const unsubCats = subscribeToCategories((liveCats) => {
+      setCategories(liveCats);
+    });
+
+    const unsubProds = subscribeToProducts((liveProds) => {
+      setAllProducts(liveProds);
+      setLoading(false);
+    });
+
+    return () => {
+      unsubCats();
+      unsubProds();
+    };
   }, []);
 
-  useEffect(() => {
-    fetchProducts();
-  }, [selectedCategory]);
+  // Filtered products list
+  const products = allProducts.filter((p) => {
+    if (selectedCategory && p.categoryId !== selectedCategory) {
+      // Also check category slug
+      const cat = categories.find((c) => c.slug === selectedCategory);
+      if (cat && p.categoryId !== cat.id) return false;
+    }
+    if (search.trim()) {
+      const term = search.toLowerCase().trim();
+      const matchName = p.name.toLowerCase().includes(term);
+      const matchSku = p.sku?.toLowerCase().includes(term);
+      if (!matchName && !matchSku) return false;
+    }
+    return true;
+  });
 
   const handleSearchSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    fetchProducts();
   };
 
   const handleDeleteProduct = async (id: string, name: string) => {
@@ -87,7 +92,7 @@ export default function AdminProductsPage() {
       const res = await fetch(`/api/products/${id}`, { method: "DELETE" });
       if (res.ok) {
         success(`Product "${name}" deleted successfully.`);
-        setProducts((prev) => prev.filter((p) => p.id !== id));
+        setAllProducts((prev) => prev.filter((p) => p.id !== id));
       } else {
         error("Failed to delete product.");
       }
@@ -104,7 +109,7 @@ export default function AdminProductsPage() {
         body: JSON.stringify({ stock: newStock }),
       });
       if (res.ok) {
-        setProducts((prev) =>
+        setAllProducts((prev) =>
           prev.map((p) => (p.id === id ? { ...p, stock: newStock } : p))
         );
         success("Stock updated.");
@@ -190,7 +195,7 @@ export default function AdminProductsPage() {
 
       if (res.ok) {
         success("Product photos updated successfully!");
-        setProducts((prev) =>
+        setAllProducts((prev) =>
           prev.map((p) =>
             p.id === editingPhotoProduct.id
               ? { ...p, images: modalPhotos }

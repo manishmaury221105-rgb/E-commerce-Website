@@ -20,6 +20,7 @@ import {
 import { formatCurrency, formatDate, generateWhatsAppOrderSummaryLink } from "@/lib/utils";
 import { ORDER_STATUS_LABELS, PAYMENT_STATUS_LABELS, PAYMENT_METHOD_LABELS } from "@/lib/constants";
 import { Order, OrderStatus } from "@/types";
+import { subscribeToOrder } from "@/lib/firestore-service";
 
 const TRACKING_STEPS: { status: OrderStatus; label: string; description: string }[] = [
   { status: "PENDING", label: "Order Placed", description: "Received & queued at local store" },
@@ -37,13 +38,16 @@ export default function OrderDetailPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch(`/api/orders/${orderId}`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.order) setOrder(data.order);
-      })
-      .catch((err) => console.error(err))
-      .finally(() => setLoading(false));
+    const unsubscribe = subscribeToOrder(orderId, (liveOrder) => {
+      if (liveOrder) {
+        setOrder(liveOrder);
+      }
+      setLoading(false);
+    });
+
+    return () => {
+      unsubscribe();
+    };
   }, [orderId]);
 
   if (loading) {

@@ -9,7 +9,8 @@ import {
   deleteDoc, 
   query, 
   where, 
-  limit 
+  limit,
+  onSnapshot 
 } from "firebase/firestore";
 import { db } from "./firebase";
 import { SafeUser, Address, UserRole } from "@/types";
@@ -221,6 +222,55 @@ export async function getAllCustomers(): Promise<SafeUser[]> {
   }
 }
 
+/**
+ * Real-time listener for all Customers in Admin Directory
+ */
+export function subscribeToUsers(callback: (users: SafeUser[]) => void) {
+  const colRef = collection(db, "users");
+  return onSnapshot(
+    colRef,
+    (snapshot) => {
+      const users: SafeUser[] = snapshot.docs.map((d) => {
+        const u = d.data() as FirestoreUserData;
+        return {
+          id: d.id,
+          name: u.name,
+          email: u.email,
+          phone: u.phone,
+          role: u.role || "CUSTOMER",
+          createdAt: u.createdAt || new Date().toISOString(),
+        };
+      });
+      callback(users);
+    },
+    (error) => {
+      console.error("Real-time users subscription error:", error);
+    }
+  );
+}
+
+/**
+ * Real-time listener for a customer's saved addresses
+ */
+export function subscribeToCustomerAddresses(
+  userId: string,
+  callback: (addresses: Address[]) => void
+) {
+  const docRef = doc(db, "users", userId);
+  return onSnapshot(
+    docRef,
+    (docSnap) => {
+      if (docSnap.exists()) {
+        const data = docSnap.data() as FirestoreUserData;
+        callback(data.addresses || []);
+      }
+    },
+    (error) => {
+      console.error("Real-time addresses subscription error:", error);
+    }
+  );
+}
+
 async function createAdminDemoUser(): Promise<FirestoreUserData> {
   const passwordHash = await hashPassword("Admin@12345");
   const adminData = {
@@ -236,3 +286,4 @@ async function createAdminDemoUser(): Promise<FirestoreUserData> {
   const res = await addDoc(collection(db, "users"), adminData);
   return { id: res.id, ...adminData };
 }
+

@@ -4,6 +4,8 @@ import React, { useState, useEffect } from "react";
 import { Settings, Save, Store, Phone, MessageCircle, Mail, MapPin, Truck, Clock, Sparkles } from "lucide-react";
 import { useToast } from "@/context/ToastContext";
 
+import { subscribeToStoreSettings, updateStoreSettings } from "@/lib/firestore-service";
+
 export default function AdminSettingsPage() {
   const { success, error } = useToast();
 
@@ -21,25 +23,23 @@ export default function AdminSettingsPage() {
   const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    fetch("/api/settings")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.settings) {
-          const s = data.settings;
-          setShopName(s.shopName);
-          setPhone(s.phone);
-          setWhatsapp(s.whatsapp);
-          setEmail(s.email);
-          setAddress(s.address);
-          setCurrency(s.currency);
-          setFreeDeliveryMin(s.freeDeliveryMin.toString());
-          setDeliveryFee(s.deliveryFee.toString());
-          setAnnouncement(s.announcement || "");
-          setOpenHours(s.openHours || "");
-        }
-      })
-      .catch((err) => console.error(err))
-      .finally(() => setLoading(false));
+    const unsubscribe = subscribeToStoreSettings((s) => {
+      if (s) {
+        setShopName(s.shopName || "");
+        setPhone(s.phone || "");
+        setWhatsapp(s.whatsapp || "");
+        setEmail(s.email || "");
+        setAddress(s.address || "");
+        setCurrency(s.currency || "₹");
+        setFreeDeliveryMin((s.freeDeliveryMin ?? 499).toString());
+        setDeliveryFee((s.deliveryFee ?? 40).toString());
+        setAnnouncement(s.announcement || "");
+        setOpenHours(s.openHours || "");
+      }
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
   }, []);
 
   const handleSave = async (e: React.FormEvent) => {
@@ -47,30 +47,22 @@ export default function AdminSettingsPage() {
     setSaving(true);
 
     try {
-      const res = await fetch("/api/settings", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          shopName,
-          phone,
-          whatsapp,
-          email,
-          address,
-          currency,
-          freeDeliveryMin,
-          deliveryFee,
-          announcement,
-          openHours,
-        }),
+      await updateStoreSettings({
+        shopName,
+        phone,
+        whatsapp,
+        email,
+        address,
+        currency,
+        freeDeliveryMin: Number(freeDeliveryMin) || 0,
+        deliveryFee: Number(deliveryFee) || 0,
+        announcement,
+        openHours,
       });
 
-      if (res.ok) {
-        success("Store configurations updated successfully!");
-      } else {
-        error("Failed to update store settings");
-      }
-    } catch (err) {
-      error("Error saving settings");
+      success("Store configurations updated successfully!");
+    } catch (err: any) {
+      error(err.message || "Failed to update store settings");
     } finally {
       setSaving(false);
     }

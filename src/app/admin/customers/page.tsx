@@ -4,6 +4,9 @@ import React, { useState, useEffect } from "react";
 import { Users, Search, ShoppingBag, Phone, Mail, MapPin } from "lucide-react";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
+import { subscribeToUsers, subscribeToOrders } from "@/lib/firestore-service";
+import { SafeUser, Order } from "@/types";
+
 interface CustomerRecord {
   id: string;
   name: string;
@@ -16,19 +19,51 @@ interface CustomerRecord {
 }
 
 export default function AdminCustomersPage() {
-  const [customers, setCustomers] = useState<CustomerRecord[]>([]);
+  const [users, setUsers] = useState<SafeUser[]>([]);
+  const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
 
   useEffect(() => {
-    fetch("/api/admin/customers")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.customers) setCustomers(data.customers);
-      })
-      .catch((err) => console.error(err))
-      .finally(() => setLoading(false));
+    let usersLoaded = false;
+    let ordersLoaded = false;
+
+    const unsubUsers = subscribeToUsers((liveUsers) => {
+      setUsers(liveUsers);
+      usersLoaded = true;
+      if (ordersLoaded) setLoading(false);
+    });
+
+    const unsubOrders = subscribeToOrders((liveOrders) => {
+      setOrders(liveOrders);
+      ordersLoaded = true;
+      if (usersLoaded) setLoading(false);
+    });
+
+    return () => {
+      unsubUsers();
+      unsubOrders();
+    };
   }, []);
+
+  const customers: CustomerRecord[] = users.map((u) => {
+    const userOrders = orders.filter(
+      (o) => o.userId === u.id || (o.customerEmail && o.customerEmail.toLowerCase() === u.email.toLowerCase())
+    );
+    const totalSpend = userOrders.reduce((sum, o) => sum + (o.total || 0), 0);
+    const lastOrder = userOrders[0];
+
+    return {
+      id: u.id,
+      name: u.name,
+      email: u.email,
+      phone: u.phone,
+      totalOrders: userOrders.length,
+      totalSpend,
+      defaultAddress: lastOrder ? lastOrder.shippingAddress : null,
+      joinedDate: u.createdAt,
+    };
+  });
 
   const filtered = customers.filter((c) => {
     if (!search.trim()) return true;

@@ -1,6 +1,5 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { cookies } from "next/headers";
 import { NextRequest } from "next/server";
 import { SafeUser } from "@/types";
 
@@ -25,13 +24,6 @@ export function verifyToken(token: string): { userId: string; email: string; rol
   } catch (error) {
     return null;
   }
-}
-
-export function getCurrentUserFromCookies(): { userId: string; email: string; role: string; name: string } | null {
-  const cookieStore = cookies();
-  const token = cookieStore.get(AUTH_COOKIE_NAME)?.value;
-  if (!token) return null;
-  return verifyToken(token);
 }
 
 export function getCurrentUserFromRequest(request: NextRequest): { userId: string; email: string; role: string; name: string } | null {

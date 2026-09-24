@@ -16,7 +16,8 @@ import {
 } from "lucide-react";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { ORDER_STATUS_LABELS } from "@/lib/constants";
-import { Order } from "@/types";
+import { Order, Product } from "@/types";
+import { subscribeToOrders, subscribeToProducts } from "@/lib/firestore-service";
 
 interface AnalyticsData {
   metrics: {
@@ -38,11 +39,93 @@ export default function AdminDashboardPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/admin/analytics")
-      .then((res) => res.json())
-      .then((res) => setData(res))
-      .catch((err) => console.error(err))
-      .finally(() => setLoading(false));
+    let ordersList: Order[] = [];
+    let productsList: Product[] = [];
+
+    const recalculateMetrics = () => {
+      const paidOrders = ordersList.filter(
+        (o) => (o.paymentStatus === "PAID" || o.orderStatus === "DELIVERED") && o.orderStatus !== "CANCELLED"
+      );
+      const totalRevenue = paidOrders.reduce((sum, o) => sum + (o.total || 0), 0);
+      const totalOrders = ordersList.length;
+      const pendingOrders = ordersList.filter((o) => o.orderStatus === "PENDING").length;
+      const activeOrders = ordersList.filter((o) =>
+        ["CONFIRMED", "PACKED", "OUT_FOR_DELIVERY"].includes(o.orderStatus)
+      ).length;
+      const deliveredOrders = ordersList.filter((o) => o.orderStatus === "DELIVERED").length;
+
+      // Unique customer count
+      const uniqueEmails = new Set(ordersList.map((o) => o.customerEmail).filter(Boolean));
+      const totalCustomers = Math.max(uniqueEmails.size, 1);
+
+      const totalProducts = productsList.length;
+      const lowStockProducts = productsList
+        .filter((p) => (p.stock || 0) <= (p.lowStockThreshold || 10))
+        .slice(0, 6)
+        .map((p) => ({
+          id: p.id,
+          name: p.name,
+          stock: p.stock,
+          price: p.price,
+        }));
+
+      const recentOrders = ordersList.slice(0, 6);
+
+      // 7-day sales trend
+      const last7Days: { date: string; sales: number; orders: number }[] = [];
+      for (let i = 6; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        d.setHours(0, 0, 0, 0);
+        const nextD = new Date(d);
+        nextD.setDate(d.getDate() + 1);
+
+        const dayOrders = paidOrders.filter((o) => {
+          const orderDate = new Date(o.createdAt || 0);
+          return orderDate >= d && orderDate < nextD;
+        });
+
+        const daySales = dayOrders.reduce((sum, o) => sum + (o.total || 0), 0);
+        const dateLabel = d.toLocaleDateString("en-IN", { month: "short", day: "numeric" });
+
+        last7Days.push({
+          date: dateLabel,
+          sales: daySales,
+          orders: dayOrders.length,
+        });
+      }
+
+      setData({
+        metrics: {
+          totalRevenue,
+          totalOrders,
+          pendingOrders,
+          activeOrders,
+          deliveredOrders,
+          totalCustomers,
+          totalProducts,
+        },
+        salesTrend: last7Days,
+        lowStockProducts,
+        recentOrders,
+      });
+      setLoading(false);
+    };
+
+    const unsubOrders = subscribeToOrders((liveOrders) => {
+      ordersList = liveOrders;
+      recalculateMetrics();
+    });
+
+    const unsubProducts = subscribeToProducts((liveProducts) => {
+      productsList = liveProducts;
+      recalculateMetrics();
+    });
+
+    return () => {
+      unsubOrders();
+      unsubProducts();
+    };
   }, []);
 
   if (loading || !data) {

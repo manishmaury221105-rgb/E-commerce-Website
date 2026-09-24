@@ -5,6 +5,7 @@ import { Tag, Plus, Trash2, CheckCircle2, Clock, AlertCircle } from "lucide-reac
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { useToast } from "@/context/ToastContext";
 import { Coupon } from "@/types";
+import { subscribeToCoupons } from "@/lib/firestore-service";
 
 export default function AdminCouponsPage() {
   const { success, error } = useToast();
@@ -21,18 +22,15 @@ export default function AdminCouponsPage() {
   const [maxDiscountAmount, setMaxDiscountAmount] = useState("");
   const [usageLimit, setUsageLimit] = useState("500");
 
-  const fetchCoupons = () => {
-    fetch("/api/coupons")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.coupons) setCoupons(data.coupons);
-      })
-      .catch((err) => console.error(err))
-      .finally(() => setLoading(false));
-  };
-
   useEffect(() => {
-    fetchCoupons();
+    const unsubscribe = subscribeToCoupons((liveCoupons) => {
+      setCoupons(liveCoupons);
+      setLoading(false);
+    });
+
+    return () => {
+      unsubscribe();
+    };
   }, []);
 
   const handleCreateCoupon = async (e: React.FormEvent) => {
@@ -66,7 +64,6 @@ export default function AdminCouponsPage() {
       setCode("");
       setDiscountValue("");
       setIsAdding(false);
-      fetchCoupons();
     } catch (err) {
       error("Error creating coupon");
     }

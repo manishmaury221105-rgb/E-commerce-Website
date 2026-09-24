@@ -12,7 +12,10 @@ import {
   orderBy, 
   limit, 
   writeBatch,
-  increment 
+  increment,
+  onSnapshot,
+  runTransaction,
+  Unsubscribe 
 } from "firebase/firestore";
 import { db } from "./firebase";
 import { 
@@ -26,7 +29,8 @@ import {
   StoreSetting, 
   ProductReview, 
   Address,
-  OrderStatus 
+  OrderStatus,
+  CartItem 
 } from "@/types";
 
 // ==========================================
@@ -329,11 +333,7 @@ export async function deleteProduct(id: string): Promise<boolean> {
 }
 
 export async function updateProductStock(id: string, quantityChange: number): Promise<void> {
-  const docRef = doc(db, "products", id);
-  await updateDoc(docRef, {
-    stock: increment(quantityChange),
-    updatedAt: new Date().toISOString(),
-  });
+  await updateProductStockSafely(id, quantityChange);
 }
 
 // ==========================================
@@ -973,3 +973,344 @@ export async function seedDefaultFirestoreData(): Promise<void> {
     console.warn("Seeding notice:", error);
   }
 }
+
+// ==========================================
+// 9. REAL-TIME SNAPSHOT LISTENERS (ONSNAPSHOT)
+// ==========================================
+
+/**
+ * Real-time listener for Products collection.
+ * Automatically triggers whenever products are added, edited, deleted, or stock changes.
+ */
+export function subscribeToProducts(
+  callback: (products: Product[]) => void,
+  filters: ProductQueryFilters = {}
+): Unsubscribe {
+  const colRef = collection(db, "products");
+  return onSnapshot(
+    colRef,
+    (snapshot) => {
+      const products: Product[] = snapshot.docs.map((d) => ({ id: d.id, ...d.data() } as Product));
+      const processed = filterAndSortProducts(products, filters);
+      callback(processed);
+    },
+    (error) => {
+      console.error("Real-time products subscription error:", error);
+    }
+  );
+}
+
+/**
+ * Real-time listener for a single Product document.
+ */
+export function subscribeToProduct(
+  idOrSlug: string,
+  callback: (product: Product | null) => void
+): Unsubscribe {
+  // If it might be an ID first, listen on docRef directly
+  const docRef = doc(db, "products", idOrSlug);
+  return onSnapshot(
+    docRef,
+    (docSnap) => {
+      if (docSnap.exists()) {
+        callback({ id: docSnap.id, ...docSnap.data() } as Product);
+      } else {
+        // Fallback search by slug
+        const q = query(collection(db, "products"), where("slug", "==", idOrSlug), limit(1));
+        const unsubscribeSlug = onSnapshot(q, (querySnap) => {
+          if (!querySnap.empty) {
+            const d = querySnap.docs[0];
+            callback({ id: d.id, ...d.data() } as Product);
+          } else {
+            callback(null);
+          }
+        });
+        return unsubscribeSlug;
+      }
+    },
+    (error) => {
+      console.error("Real-time single product subscription error:", error);
+    }
+  );
+}
+
+/**
+ * Real-time listener for Categories.
+ */
+export function subscribeToCategories(
+  callback: (categories: Category[]) => void
+): Unsubscribe {
+  const colRef = collection(db, "categories");
+  return onSnapshot(
+    colRef,
+    (snapshot) => {
+      const categories = snapshot.docs.map((d) => ({ id: d.id, ...d.data() } as Category));
+      categories.sort((a, b) => (a.order || 0) - (b.order || 0));
+      callback(categories);
+    },
+    (error) => {
+      console.error("Real-time categories subscription error:", error);
+    }
+  );
+}
+
+/**
+ * Real-time listener for Banners.
+ */
+export function subscribeToBanners(
+  callback: (banners: Banner[]) => void,
+  activeOnly: boolean = false
+): Unsubscribe {
+  const colRef = collection(db, "banners");
+  return onSnapshot(
+    colRef,
+    (snapshot) => {
+      let banners = snapshot.docs.map((d) => ({ id: d.id, ...d.data() } as Banner));
+      if (activeOnly) {
+        banners = banners.filter((b) => b.isActive !== false);
+      }
+      banners.sort((a, b) => (a.order || 0) - (b.order || 0));
+      callback(banners);
+    },
+    (error) => {
+      console.error("Real-time banners subscription error:", error);
+    }
+  );
+}
+
+/**
+ * Real-time listener for Orders (Admin list or Customer list).
+ */
+export function subscribeToOrders(
+  callback: (orders: Order[]) => void,
+  userId?: string
+): Unsubscribe {
+  const colRef = collection(db, "orders");
+  const q = userId
+    ? query(colRef, where("userId", "==", userId))
+    : colRef;
+
+  return onSnapshot(
+    q,
+    (snapshot) => {
+      const orders = snapshot.docs.map((d) => ({ id: d.id, ...d.data() } as Order));
+      orders.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
+      callback(orders);
+    },
+    (error) => {
+      console.error("Real-time orders subscription error:", error);
+    }
+  );
+}
+
+/**
+ * Real-time listener for a single Order document (Customer Live Tracker).
+ */
+export function subscribeToOrder(
+  orderIdOrNumber: string,
+  callback: (order: Order | null) => void
+): Unsubscribe {
+  const docRef = doc(db, "orders", orderIdOrNumber);
+  return onSnapshot(
+    docRef,
+    (docSnap) => {
+      if (docSnap.exists()) {
+        callback({ id: docSnap.id, ...docSnap.data() } as Order);
+      } else {
+        // Fallback query by orderNumber
+        const q = query(collection(db, "orders"), where("orderNumber", "==", orderIdOrNumber), limit(1));
+        const unsub = onSnapshot(q, (snap) => {
+          if (!snap.empty) {
+            callback({ id: snap.docs[0].id, ...snap.docs[0].data() } as Order);
+          } else {
+            callback(null);
+          }
+        });
+        return unsub;
+      }
+    },
+    (error) => {
+      console.error("Real-time single order subscription error:", error);
+    }
+  );
+}
+
+/**
+ * Real-time listener for Store Settings.
+ */
+export function subscribeToStoreSettings(
+  callback: (settings: StoreSetting) => void
+): Unsubscribe {
+  const docRef = doc(db, "settings", "default");
+  return onSnapshot(
+    docRef,
+    (docSnap) => {
+      if (docSnap.exists()) {
+        callback({ ...DEFAULT_SETTINGS, ...docSnap.data(), id: "default" } as StoreSetting);
+      } else {
+        callback(DEFAULT_SETTINGS);
+      }
+    },
+    (error) => {
+      console.error("Real-time settings subscription error:", error);
+    }
+  );
+}
+
+/**
+ * Real-time listener for Coupons.
+ */
+export function subscribeToCoupons(
+  callback: (coupons: Coupon[]) => void
+): Unsubscribe {
+  const colRef = collection(db, "coupons");
+  return onSnapshot(
+    colRef,
+    (snapshot) => {
+      const coupons = snapshot.docs.map((d) => ({ id: d.id, ...d.data() } as Coupon));
+      callback(coupons);
+    },
+    (error) => {
+      console.error("Real-time coupons subscription error:", error);
+    }
+  );
+}
+
+/**
+ * Real-time listener for Product Reviews.
+ */
+export function subscribeToReviews(
+  productId: string,
+  callback: (reviews: ProductReview[]) => void
+): Unsubscribe {
+  const colRef = collection(db, "reviews");
+  const q = query(colRef, where("productId", "==", productId));
+  return onSnapshot(
+    q,
+    (snapshot) => {
+      const reviews = snapshot.docs.map((d) => ({ id: d.id, ...d.data() } as ProductReview));
+      reviews.sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
+      callback(reviews);
+    },
+    (error) => {
+      console.error("Real-time reviews subscription error:", error);
+    }
+  );
+}
+
+/**
+ * Real-time sync for Customer Cart with Firestore.
+ */
+export function subscribeToCustomerCart(
+  userId: string,
+  callback: (items: CartItem[]) => void
+): Unsubscribe {
+  const docRef = doc(db, "users", userId);
+  return onSnapshot(
+    docRef,
+    (docSnap) => {
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        if (Array.isArray(data.cart)) {
+          callback(data.cart as CartItem[]);
+        }
+      }
+    },
+    (error) => {
+      console.warn("Cart real-time sync notice:", error);
+    }
+  );
+}
+
+export async function syncCustomerCart(userId: string, items: CartItem[]): Promise<void> {
+  try {
+    const docRef = doc(db, "users", userId);
+    await updateDoc(docRef, {
+      cart: items,
+      cartUpdatedAt: new Date().toISOString(),
+    });
+  } catch (error) {
+    console.warn("Sync cart error:", error);
+  }
+}
+
+/**
+ * Real-time listener for all Customers in Admin Directory
+ */
+export function subscribeToUsers(callback: (users: SafeUser[]) => void): Unsubscribe {
+  const colRef = collection(db, "users");
+  return onSnapshot(
+    colRef,
+    (snapshot) => {
+      const users: SafeUser[] = snapshot.docs.map((d) => {
+        const u = d.data();
+        return {
+          id: d.id,
+          name: u.name || "Customer",
+          email: u.email || "",
+          phone: u.phone || null,
+          role: u.role || "CUSTOMER",
+          createdAt: u.createdAt || new Date().toISOString(),
+        };
+      });
+      callback(users);
+    },
+    (error) => {
+      console.error("Real-time users subscription error:", error);
+    }
+  );
+}
+
+/**
+ * Real-time listener for a customer's saved addresses
+ */
+export function subscribeToCustomerAddresses(
+  userId: string,
+  callback: (addresses: Address[]) => void
+): Unsubscribe {
+  const docRef = doc(db, "users", userId);
+  return onSnapshot(
+    docRef,
+    (docSnap) => {
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        callback(data.addresses || []);
+      }
+    },
+    (error) => {
+      console.error("Real-time addresses subscription error:", error);
+    }
+  );
+}
+
+/**
+ * Concurrency-safe atomic stock update using Firestore transaction.
+ */
+export async function updateProductStockSafely(
+  productId: string,
+  quantityChange: number
+): Promise<{ success: boolean; newStock: number; message?: string }> {
+  const docRef = doc(db, "products", productId);
+  try {
+    const result = await runTransaction(db, async (transaction) => {
+      const prodDoc = await transaction.get(docRef);
+      if (!prodDoc.exists()) {
+        throw new Error("Product not found");
+      }
+      const currentStock = prodDoc.data().stock ?? 0;
+      const newStock = currentStock + quantityChange;
+      if (newStock < 0) {
+        throw new Error(`Insufficient stock. Current available stock is ${currentStock}.`);
+      }
+      transaction.update(docRef, {
+        stock: newStock,
+        updatedAt: new Date().toISOString(),
+      });
+      return newStock;
+    });
+    return { success: true, newStock: result };
+  } catch (err: any) {
+    return { success: false, newStock: 0, message: err.message || "Stock update transaction failed" };
+  }
+}
+

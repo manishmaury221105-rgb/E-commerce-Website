@@ -66,6 +66,7 @@ export interface Product {
   stock: number;
   lowStockThreshold: number;
   unit: string;
+  isActive?: boolean;
   isFeatured: boolean;
   isDailyDeal: boolean;
   dealEndsAt?: string | null;

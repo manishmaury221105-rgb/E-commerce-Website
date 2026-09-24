@@ -4,6 +4,9 @@ import React, { createContext, useContext, useState, useEffect, useMemo, useCall
 import { CartItem, Coupon, Product } from "@/types";
 import { useToast } from "./ToastContext";
 
+import { useAuth } from "./AuthContext";
+import { subscribeToCustomerCart, syncCustomerCart } from "@/lib/firestore-service";
+
 interface CartContextType {
   items: CartItem[];
   addItem: (product: Product, quantity?: number) => void;
@@ -39,8 +42,9 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isMounted, setIsMounted] = useState(false);
   const { success, error, info } = useToast();
+  const { user } = useAuth();
 
-  // Load from local storage
+  // Load from local storage on mount
   useEffect(() => {
     try {
       const savedItems = localStorage.getItem(CART_STORAGE_KEY);
@@ -54,7 +58,26 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     setIsMounted(true);
   }, []);
 
-  // Save to local storage on change
+  // Real-time listener for authenticated user's cart from Firestore
+  useEffect(() => {
+    if (!user?.id) return;
+
+    const unsubscribe = subscribeToCustomerCart(user.id, (firestoreItems) => {
+      if (Array.isArray(firestoreItems)) {
+        setItems((currentItems) => {
+          // If firestore has items or remote update occurred, sync state
+          if (JSON.stringify(currentItems) !== JSON.stringify(firestoreItems)) {
+            return firestoreItems;
+          }
+          return currentItems;
+        });
+      }
+    });
+
+    return () => unsubscribe();
+  }, [user?.id]);
+
+  // Save to local storage & sync to Firestore on change
   useEffect(() => {
     if (!isMounted) return;
     try {
@@ -62,7 +85,11 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
     } catch (e) {
       console.error("Failed saving cart to localStorage", e);
     }
-  }, [items, isMounted]);
+
+    if (user?.id) {
+      syncCustomerCart(user.id, items);
+    }
+  }, [items, isMounted, user?.id]);
 
   useEffect(() => {
     if (!isMounted) return;

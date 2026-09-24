@@ -4,6 +4,7 @@ import React, { useState, useEffect } from "react";
 import { Layers, Plus, Trash2, Edit2, Image as ImageIcon, CheckCircle2, ArrowRight } from "lucide-react";
 import { useToast } from "@/context/ToastContext";
 import { Category, Banner } from "@/types";
+import { subscribeToCategories, subscribeToBanners } from "@/lib/firestore-service";
 
 export default function AdminCategoriesPage() {
   const { success, error } = useToast();
@@ -27,21 +28,20 @@ export default function AdminCategoriesPage() {
   const [bannerLink, setBannerLink] = useState("/products");
   const [isAddingBanner, setIsAddingBanner] = useState(false);
 
-  const fetchData = () => {
-    Promise.all([
-      fetch("/api/categories").then((r) => r.json()),
-      fetch("/api/banners").then((r) => r.json()),
-    ])
-      .then(([catRes, bannerRes]) => {
-        if (catRes.categories) setCategories(catRes.categories);
-        if (bannerRes.banners) setBanners(bannerRes.banners);
-      })
-      .catch((err) => console.error(err))
-      .finally(() => setLoading(false));
-  };
-
   useEffect(() => {
-    fetchData();
+    const unsubCats = subscribeToCategories((liveCats) => {
+      setCategories(liveCats);
+      setLoading(false);
+    });
+
+    const unsubBanners = subscribeToBanners((liveBanners) => {
+      setBanners(liveBanners);
+    });
+
+    return () => {
+      unsubCats();
+      unsubBanners();
+    };
   }, []);
 
   const handleCreateCategory = async (e: React.FormEvent) => {
@@ -68,7 +68,6 @@ export default function AdminCategoriesPage() {
         setCatImage("");
         setCatDescription("");
         setIsAddingCat(false);
-        fetchData();
       } else {
         error("Failed to create category");
       }
@@ -104,7 +103,6 @@ export default function AdminCategoriesPage() {
         setBannerTag("");
         setBannerImage("");
         setIsAddingBanner(false);
-        fetchData();
       }
     } catch (err) {
       error("Error creating banner");
@@ -117,7 +115,6 @@ export default function AdminCategoriesPage() {
       const res = await fetch(`/api/categories/${id}`, { method: "DELETE" });
       if (res.ok) {
         success(`Category "${name}" deleted.`);
-        fetchData();
       } else {
         const data = await res.json();
         error(data.error || "Failed to delete category");
@@ -133,7 +130,6 @@ export default function AdminCategoriesPage() {
       const res = await fetch(`/api/banners/${id}`, { method: "DELETE" });
       if (res.ok) {
         success(`Banner "${title}" deleted successfully.`);
-        fetchData();
       } else {
         const data = await res.json();
         error(data.error || "Failed to delete banner");

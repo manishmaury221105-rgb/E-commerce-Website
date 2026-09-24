@@ -7,31 +7,30 @@ import { formatCurrency, formatDate } from "@/lib/utils";
 import { ORDER_STATUS_LABELS, PAYMENT_STATUS_LABELS } from "@/lib/constants";
 import { useToast } from "@/context/ToastContext";
 import { Order, OrderStatus } from "@/types";
+import { subscribeToOrders } from "@/lib/firestore-service";
 
 export default function AdminOrdersPage() {
   const { success, error } = useToast();
-  const [orders, setOrders] = useState<Order[]>([]);
+  const [allOrders, setAllOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [search, setSearch] = useState("");
 
-  const fetchOrders = () => {
-    setLoading(true);
-    const params = new URLSearchParams();
-    if (statusFilter !== "ALL") params.set("status", statusFilter);
-
-    fetch(`/api/orders?${params.toString()}`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.orders) setOrders(data.orders);
-      })
-      .catch((err) => console.error(err))
-      .finally(() => setLoading(false));
-  };
-
   useEffect(() => {
-    fetchOrders();
-  }, [statusFilter]);
+    const unsubscribe = subscribeToOrders((liveOrders) => {
+      setAllOrders(liveOrders);
+      setLoading(false);
+    });
+
+    return () => {
+      unsubscribe();
+    };
+  }, []);
+
+  const orders = allOrders.filter((o) => {
+    if (statusFilter !== "ALL" && o.orderStatus !== statusFilter) return false;
+    return true;
+  });
 
   const handleUpdateStatus = async (orderId: string, newStatus: OrderStatus) => {
     try {
@@ -46,7 +45,7 @@ export default function AdminOrdersPage() {
 
       if (res.ok) {
         success(`Order status updated to ${newStatus}`);
-        setOrders((prev) =>
+        setAllOrders((prev) =>
           prev.map((o) => (o.id === orderId ? { ...o, orderStatus: newStatus } : o))
         );
       }

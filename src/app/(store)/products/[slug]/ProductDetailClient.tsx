@@ -24,33 +24,53 @@ import { useCart } from "@/context/CartContext";
 import { useToast } from "@/context/ToastContext";
 import { formatCurrency, generateWhatsAppProductOrderLink } from "@/lib/utils";
 import { ProductCard } from "@/components/storefront/ProductCard";
+import { subscribeToProduct, subscribeToReviews } from "@/lib/firestore-service";
 
 interface ProductDetailClientProps {
   product: Product;
   relatedProducts: Product[];
 }
 
-export function ProductDetailClient({ product, relatedProducts }: ProductDetailClientProps) {
+export function ProductDetailClient({ product: initialProduct, relatedProducts }: ProductDetailClientProps) {
   const { addItem, items, updateQuantity } = useCart();
   const { success, error } = useToast();
   const router = useRouter();
 
+  const [product, setProduct] = useState<Product>(initialProduct);
   const [selectedImage, setSelectedImage] = useState(0);
   const [quantity, setQuantity] = useState(1);
   const [pincode, setPincode] = useState("");
   const [pincodeChecked, setPincodeChecked] = useState(false);
 
   // Reviews state
-  const [reviews, setReviews] = useState(product.reviews || []);
+  const [reviews, setReviews] = useState(initialProduct.reviews || []);
   const [newRating, setNewRating] = useState(5);
   const [newComment, setNewComment] = useState("");
   const [newReviewerName, setNewReviewerName] = useState("");
   const [isSubmittingReview, setIsSubmittingReview] = useState(false);
 
+  // Real-time synchronization for product and reviews
+  React.useEffect(() => {
+    const unsubProd = subscribeToProduct(initialProduct.id, (liveProd) => {
+      if (liveProd) {
+        setProduct((prev) => ({ ...prev, ...liveProd }));
+      }
+    });
+
+    const unsubRev = subscribeToReviews(initialProduct.id, (liveReviews) => {
+      setReviews(liveReviews);
+    });
+
+    return () => {
+      unsubProd();
+      unsubRev();
+    };
+  }, [initialProduct.id]);
+
   const cartItem = items.find((i) => i.productId === product.id);
   const isInCart = Boolean(cartItem);
 
-  const images = product.images.length > 0 ? product.images : ["https://placehold.co/600x600?text=Product"];
+  const images = (product.images && product.images.length > 0) ? product.images : ["https://placehold.co/600x600?text=Product"];
 
   const discountPercent =
     product.compareAtPrice && product.compareAtPrice > product.price

@@ -6,6 +6,7 @@ import { MapPin, Plus, Trash2, CheckCircle2, Home, Building, ArrowLeft } from "l
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/context/ToastContext";
 import { Address } from "@/types";
+import { subscribeToCustomerAddresses } from "@/lib/firestore-service";
 
 export default function AddressesPage() {
   const { user } = useAuth();
@@ -27,20 +28,19 @@ export default function AddressesPage() {
   const [isDefault, setIsDefault] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
 
-  const fetchAddresses = () => {
-    fetch("/api/addresses")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.addresses) setAddresses(data.addresses);
-      })
-      .catch((err) => console.error(err))
-      .finally(() => setLoading(false));
-  };
-
   useEffect(() => {
-    if (user) fetchAddresses();
-    else setLoading(false);
-  }, [user]);
+    if (!user?.id) {
+      setLoading(false);
+      return;
+    }
+
+    const unsubscribe = subscribeToCustomerAddresses(user.id, (liveAddresses) => {
+      setAddresses(liveAddresses);
+      setLoading(false);
+    });
+
+    return () => unsubscribe();
+  }, [user?.id]);
 
   const handleAddAddress = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -80,7 +80,6 @@ export default function AddressesPage() {
       setPhone("");
       setStreet("");
       setApartment("");
-      fetchAddresses();
     } catch (err) {
       error("Error saving address");
     } finally {
@@ -95,7 +94,6 @@ export default function AddressesPage() {
       const res = await fetch(`/api/addresses/${id}`, { method: "DELETE" });
       if (res.ok) {
         success("Address removed");
-        setAddresses((prev) => prev.filter((a) => a.id !== id));
       }
     } catch (err) {
       error("Failed to delete address");
@@ -111,7 +109,6 @@ export default function AddressesPage() {
       });
       if (res.ok) {
         success("Default address updated");
-        fetchAddresses();
       }
     } catch (err) {
       error("Failed to update default address");

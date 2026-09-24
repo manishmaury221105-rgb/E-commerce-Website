@@ -15,11 +15,13 @@ import {
   Check,
 } from "lucide-react";
 
+import { subscribeToProducts, subscribeToCategories } from "@/lib/firestore-service";
+
 function ProductsContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
 
-  const [products, setProducts] = useState<Product[]>([]);
+  const [allProducts, setAllProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -33,36 +35,52 @@ function ProductsContent() {
   const [maxPrice, setMaxPrice] = useState<number>(1000);
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
 
-  // Fetch categories
+  // Real-time categories & products listeners
   useEffect(() => {
-    fetch("/api/categories")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.categories) setCategories(data.categories);
-      })
-      .catch((err) => console.error(err));
+    const unsubCats = subscribeToCategories((liveCats) => {
+      setCategories(liveCats);
+    });
+
+    const unsubProds = subscribeToProducts((liveProds) => {
+      setAllProducts(liveProds);
+      setLoading(false);
+    });
+
+    return () => {
+      unsubCats();
+      unsubProds();
+    };
   }, []);
 
-  // Fetch products with filters
-  useEffect(() => {
-    setLoading(true);
-    const params = new URLSearchParams();
-    if (searchQuery.trim()) params.set("search", searchQuery.trim());
-    if (selectedCategory) params.set("category", selectedCategory);
-    if (selectedSort) params.set("sort", selectedSort);
-    if (onlyDeals) params.set("deal", "true");
-    if (onlyFeatured) params.set("featured", "true");
-    if (onlyInStock) params.set("inStock", "true");
-    if (maxPrice < 1000) params.set("maxPrice", maxPrice.toString());
-
-    fetch(`/api/products?${params.toString()}`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.products) setProducts(data.products);
-      })
-      .catch((err) => console.error(err))
-      .finally(() => setLoading(false));
-  }, [searchQuery, selectedCategory, selectedSort, onlyDeals, onlyFeatured, onlyInStock, maxPrice]);
+  // Compute filtered & sorted products in real time
+  const products = allProducts
+    .filter((p) => {
+      if (selectedCategory) {
+        const cat = categories.find((c) => c.slug === selectedCategory);
+        if (p.categoryId !== selectedCategory && (!cat || p.categoryId !== cat.id)) {
+          return false;
+        }
+      }
+      if (searchQuery.trim()) {
+        const term = searchQuery.toLowerCase().trim();
+        const matchName = p.name.toLowerCase().includes(term);
+        const matchDesc = (p.description || "").toLowerCase().includes(term);
+        const matchShort = (p.shortDescription || "").toLowerCase().includes(term);
+        if (!matchName && !matchDesc && !matchShort) return false;
+      }
+      if (onlyDeals && !p.isDailyDeal) return false;
+      if (onlyFeatured && !p.isFeatured) return false;
+      if (onlyInStock && p.stock <= 0) return false;
+      if (p.price > maxPrice) return false;
+      return true;
+    })
+    .sort((a, b) => {
+      if (selectedSort === "price-asc") return a.price - b.price;
+      if (selectedSort === "price-desc") return b.price - a.price;
+      if (selectedSort === "rating") return (b.rating || 5) - (a.rating || 5);
+      if (selectedSort === "newest") return new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime();
+      return 0;
+    });
 
   const clearAllFilters = () => {
     setSearchQuery("");

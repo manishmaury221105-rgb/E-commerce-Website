@@ -7,6 +7,7 @@ import { useAuth } from "@/context/AuthContext";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { ORDER_STATUS_LABELS, PAYMENT_STATUS_LABELS } from "@/lib/constants";
 import { Order } from "@/types";
+import { subscribeToOrders } from "@/lib/firestore-service";
 
 export default function OrdersPage() {
   const { user } = useAuth();
@@ -14,13 +15,20 @@ export default function OrdersPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/orders")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.orders) setOrders(data.orders);
-      })
-      .catch((err) => console.error(err))
-      .finally(() => setLoading(false));
+    if (!user) {
+      setOrders([]);
+      setLoading(false);
+      return;
+    }
+
+    const unsubscribe = subscribeToOrders((liveOrders) => {
+      setOrders(liveOrders);
+      setLoading(false);
+    }, user.id);
+
+    return () => {
+      unsubscribe();
+    };
   }, [user]);
 
   return (
