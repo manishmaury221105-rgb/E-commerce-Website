@@ -432,10 +432,10 @@ export default function NewProductPage() {
               Add More Photos to Gallery
             </h4>
 
-            {/* 1. Upload from Computer/Device */}
+            {/* File Upload */}
             <div>
               <label className="block text-xs font-semibold text-slate-300 mb-1">
-                Option 1: Upload from Computer / Phone <span className="text-emerald-400 font-normal">(Select multiple files at once)</span>
+                Upload from Device <span className="text-emerald-400 font-normal">(Select one or multiple photos)</span>
               </label>
               <input
                 type="file"
@@ -446,10 +446,10 @@ export default function NewProductPage() {
               />
             </div>
 
-            {/* 2. Paste Direct URL */}
+            {/* Direct URL */}
             <div>
               <label className="block text-xs font-semibold text-slate-300 mb-1">
-                Option 2: Or Add Photo via Web URL
+                Or Add Photo by URL
               </label>
               <div className="flex gap-2">
                 <input
@@ -475,8 +475,7 @@ export default function NewProductPage() {
                 </button>
               </div>
             </div>
-
-            </div>
+          </div>
 
           <div className="flex flex-wrap gap-6 pt-2 border-t border-slate-800">
             <label className="flex items-center gap-2 cursor-pointer select-none text-xs text-slate-200">

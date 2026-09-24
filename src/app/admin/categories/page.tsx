@@ -341,7 +341,7 @@ export default function AdminCategoriesPage() {
             <div className="space-y-3 bg-slate-900/60 p-4 rounded-2xl border border-slate-700/80">
               <div>
                 <label className="block text-xs font-semibold text-slate-300 mb-1">
-                  Option 1: Upload Banner Photo from Computer / Phone
+                  Upload Banner Photo from Device
                 </label>
                 <input
                   type="file"
@@ -364,7 +364,7 @@ export default function AdminCategoriesPage() {
 
               <div>
                 <label className="block text-xs font-semibold text-slate-300 mb-1">
-                  Option 2: Or Paste Image URL Link *
+                  Or Paste Banner Image URL *
                 </label>
                 <input
                   type="url"

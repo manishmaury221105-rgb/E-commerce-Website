@@ -660,10 +660,10 @@ export default function AdminProductsPage() {
                 Add More Photos
               </h4>
 
-              {/* 1. Multi File Upload */}
+              {/* File Upload */}
               <div>
                 <label className="block text-xs font-semibold text-slate-300 mb-1">
-                  1. Upload from Phone / Laptop <span className="text-emerald-400 font-normal">(Select multiple files at once)</span>
+                  Upload from Device <span className="text-emerald-400 font-normal">(Select one or multiple photos)</span>
                 </label>
                 <input
                   type="file"
@@ -674,10 +674,10 @@ export default function AdminProductsPage() {
                 />
               </div>
 
-              {/* 2. Direct URL Append */}
+              {/* Direct URL */}
               <div>
                 <label className="block text-xs font-semibold text-slate-300 mb-1">
-                  2. Or Add Photo via Web URL
+                  Or Add Photo by URL
                 </label>
                 <div className="flex gap-2">
                   <input
