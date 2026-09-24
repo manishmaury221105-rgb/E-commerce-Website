@@ -3,7 +3,7 @@ import fs from "fs";
 import { PrismaClient } from "@prisma/client";
 
 function getResolvedDatabaseUrl(): string {
-  // If a custom DATABASE_URL is explicitly set (e.g. Postgres, Neon, PlanetScale, Supabase)
+  // If a custom remote DATABASE_URL is explicitly set (e.g. Postgres, Neon, PlanetScale, Supabase)
   if (
     process.env.DATABASE_URL &&
     process.env.DATABASE_URL.trim() !== "" &&
@@ -17,31 +17,36 @@ function getResolvedDatabaseUrl(): string {
     const tmpDbPath = path.join("/tmp", "dev.db");
     
     try {
-      if (!fs.existsSync(tmpDbPath)) {
+      const isTmpValid = fs.existsSync(tmpDbPath) && fs.statSync(tmpDbPath).size > 1000;
+      
+      if (!isTmpValid) {
         const potentialSources = [
           path.join(process.cwd(), "prisma", "dev.db"),
           path.join(process.cwd(), "dev.db"),
           path.join("/var", "task", "prisma", "dev.db"),
           path.join("/var", "task", "dev.db"),
+          path.join(__dirname, "prisma", "dev.db"),
+          path.join(__dirname, "..", "prisma", "dev.db"),
+          path.resolve("./prisma/dev.db"),
         ];
 
         let copied = false;
         for (const source of potentialSources) {
-          if (fs.existsSync(source)) {
+          if (fs.existsSync(source) && fs.statSync(source).size > 1000) {
             fs.copyFileSync(source, tmpDbPath);
             copied = true;
             break;
           }
         }
 
-        if (!copied) {
-          // If no pre-seeded db file was packaged, create empty file in /tmp
+        if (!copied && !fs.existsSync(tmpDbPath)) {
           fs.writeFileSync(tmpDbPath, "");
         }
       }
       return `file:${tmpDbPath}`;
     } catch (err) {
       console.warn("Could not copy database to /tmp:", err);
+      return `file:${tmpDbPath}`;
     }
   }
 
