@@ -43,7 +43,23 @@ export async function signInWithGoogle() {
     return { success: true, user: result.user };
   } catch (error: any) {
     console.error("Firebase Google Auth Error:", error);
-    return { success: false, error: error.message || "Failed to sign in with Google" };
+    let errorMsg = error.message || "Failed to sign in with Google";
+    
+    if (error.code === "auth/unauthorized-domain") {
+      errorMsg = "Domain 'localhost' is not authorized in Firebase. Please add 'localhost' to Firebase Console -> Authentication -> Settings -> Authorized domains.";
+    } else if (error.code === "auth/popup-closed-by-user") {
+      errorMsg = "Google sign-in popup was closed before completing.";
+    } else if (error.code === "auth/operation-not-allowed") {
+      errorMsg = "Google Sign-in provider is disabled in Firebase Console. Please enable it in Authentication -> Sign-in method.";
+    } else if (error.code === "auth/popup-blocked") {
+      errorMsg = "Popup was blocked by browser. Please allow popups for this site.";
+    }
+    
+    return { 
+      success: false, 
+      error: errorMsg,
+      code: error.code 
+    };
   }
 }
 
