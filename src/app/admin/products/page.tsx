@@ -112,10 +112,85 @@ export default function AdminProductsPage() {
         setAllProducts((prev) =>
           prev.map((p) => (p.id === id ? { ...p, stock: newStock } : p))
         );
-        success("Stock updated.");
+        success("Stock updated in real-time.");
       }
     } catch (err) {
       error("Failed to update stock");
+    }
+  };
+
+  const handleQuickPriceUpdate = async (id: string, newPrice: number) => {
+    try {
+      const res = await fetch(`/api/products/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ price: newPrice }),
+      });
+      if (res.ok) {
+        setAllProducts((prev) =>
+          prev.map((p) => (p.id === id ? { ...p, price: newPrice } : p))
+        );
+        success("Price updated in real-time.");
+      }
+    } catch (err) {
+      error("Failed to update price");
+    }
+  };
+
+  const handleToggleActive = async (id: string, currentActive: boolean = true) => {
+    const nextState = !currentActive;
+    try {
+      const res = await fetch(`/api/products/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isActive: nextState }),
+      });
+      if (res.ok) {
+        setAllProducts((prev) =>
+          prev.map((p) => (p.id === id ? { ...p, isActive: nextState } : p))
+        );
+        success(nextState ? "Product activated." : "Product deactivated.");
+      }
+    } catch (err) {
+      error("Failed to toggle product status");
+    }
+  };
+
+  const handleToggleFeatured = async (id: string, currentFeatured: boolean) => {
+    const nextState = !currentFeatured;
+    try {
+      const res = await fetch(`/api/products/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isFeatured: nextState }),
+      });
+      if (res.ok) {
+        setAllProducts((prev) =>
+          prev.map((p) => (p.id === id ? { ...p, isFeatured: nextState } : p))
+        );
+        success(nextState ? "Marked as Featured." : "Unmarked from Featured.");
+      }
+    } catch (err) {
+      error("Failed to toggle featured status");
+    }
+  };
+
+  const handleToggleDailyDeal = async (id: string, currentDailyDeal: boolean) => {
+    const nextState = !currentDailyDeal;
+    try {
+      const res = await fetch(`/api/products/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isDailyDeal: nextState }),
+      });
+      if (res.ok) {
+        setAllProducts((prev) =>
+          prev.map((p) => (p.id === id ? { ...p, isDailyDeal: nextState } : p))
+        );
+        success(nextState ? "Marked as Flash Deal." : "Unmarked from Flash Deal.");
+      }
+    } catch (err) {
+      error("Failed to toggle deal status");
     }
   };
 
@@ -281,8 +356,9 @@ export default function AdminProductsPage() {
                   <th className="p-4 w-20">Photo</th>
                   <th className="p-4">Product Name & SKU</th>
                   <th className="p-4">Category</th>
-                  <th className="p-4">Price / Unit</th>
+                  <th className="p-4">Price (₹)</th>
                   <th className="p-4">Stock Level</th>
+                  <th className="p-4">Status</th>
                   <th className="p-4">Tags</th>
                   <th className="p-4 text-right">Actions</th>
                 </tr>
@@ -291,6 +367,7 @@ export default function AdminProductsPage() {
                 {products.map((prod) => {
                   const isLow = prod.stock <= (prod.lowStockThreshold || 5);
                   const isOut = prod.stock <= 0;
+                  const isActive = prod.isActive !== false;
                   const images = Array.isArray(prod.images)
                     ? prod.images
                     : typeof prod.images === "string"
@@ -349,12 +426,24 @@ export default function AdminProductsPage() {
                         {prod.category?.name || "Uncategorized"}
                       </td>
 
-                      {/* Price */}
+                      {/* Price with Real-time Quick Edit */}
                       <td className="p-4">
-                        <div className="font-bold text-slate-200">
-                          {formatCurrency(prod.price)}
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-xs text-slate-400 font-bold">₹</span>
+                          <input
+                            type="number"
+                            step="0.5"
+                            defaultValue={prod.price}
+                            onBlur={(e) => {
+                              const val = parseFloat(e.target.value);
+                              if (!isNaN(val) && val !== prod.price) {
+                                handleQuickPriceUpdate(prod.id, val);
+                              }
+                            }}
+                            className="w-18 bg-slate-800 border border-slate-700 rounded-lg px-2 py-1 text-xs font-bold text-slate-200 focus:outline-none focus:border-emerald-500"
+                          />
                         </div>
-                        <span className="text-[10px] text-slate-500">{prod.unit}</span>
+                        <span className="text-[10px] text-slate-500 block mt-0.5">{prod.unit}</span>
                       </td>
 
                       {/* Stock Level with Quick Adjustment */}
@@ -389,19 +478,49 @@ export default function AdminProductsPage() {
                         </div>
                       </td>
 
-                      {/* Tags (Featured / Deal) */}
+                      {/* Active Status (1-Click Real-Time Toggle) */}
                       <td className="p-4">
-                        <div className="flex flex-wrap gap-1">
-                          {prod.isFeatured && (
-                            <span className="bg-emerald-950/80 border border-emerald-800/60 text-emerald-400 text-[10px] font-bold px-1.5 py-0.5 rounded">
-                              Featured
-                            </span>
-                          )}
-                          {prod.isDailyDeal && (
-                            <span className="bg-amber-950/80 border border-amber-800/60 text-amber-400 text-[10px] font-bold px-1.5 py-0.5 rounded">
-                              Flash Deal
-                            </span>
-                          )}
+                        <button
+                          type="button"
+                          onClick={() => handleToggleActive(prod.id, isActive)}
+                          className={`text-[10px] font-extrabold px-2.5 py-1 rounded-full border transition-all ${
+                            isActive
+                              ? "bg-emerald-950/80 text-emerald-400 border-emerald-800/80 hover:bg-emerald-900"
+                              : "bg-rose-950/80 text-rose-400 border-rose-800/80 hover:bg-rose-900"
+                          }`}
+                          title="Click to toggle Active / Inactive"
+                        >
+                          {isActive ? "● Active" : "○ Inactive"}
+                        </button>
+                      </td>
+
+                      {/* Tags (1-Click Real-Time Toggles) */}
+                      <td className="p-4">
+                        <div className="flex flex-wrap gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => handleToggleFeatured(prod.id, prod.isFeatured)}
+                            className={`text-[10px] font-bold px-2 py-0.5 rounded transition-all ${
+                              prod.isFeatured
+                                ? "bg-emerald-950/80 border border-emerald-800/60 text-emerald-400"
+                                : "bg-slate-800/80 text-slate-500 border border-slate-700 hover:text-slate-300"
+                            }`}
+                            title="Toggle Featured on homepage"
+                          >
+                            ⭐ Featured
+                          </button>
+                          <button
+                            type="button"
+                            onClick={() => handleToggleDailyDeal(prod.id, prod.isDailyDeal)}
+                            className={`text-[10px] font-bold px-2 py-0.5 rounded transition-all ${
+                              prod.isDailyDeal
+                                ? "bg-amber-950/80 border border-amber-800/60 text-amber-400"
+                                : "bg-slate-800/80 text-slate-500 border border-slate-700 hover:text-slate-300"
+                            }`}
+                            title="Toggle Flash Deal"
+                          >
+                            ⚡ Deal
+                          </button>
                         </div>
                       </td>
 
