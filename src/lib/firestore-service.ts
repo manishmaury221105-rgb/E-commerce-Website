@@ -68,7 +68,14 @@ export async function getStoreSettings(): Promise<StoreSetting> {
 
 export async function updateStoreSettings(data: Partial<StoreSetting>): Promise<StoreSetting> {
   const docRef = doc(db, "settings", "default");
-  await setDoc(docRef, { ...data, updatedAt: new Date().toISOString() }, { merge: true });
+  const cleanData: Record<string, any> = { updatedAt: new Date().toISOString() };
+  for (const [k, v] of Object.entries(data)) {
+    if (v !== undefined) cleanData[k] = v;
+  }
+  if (cleanData.freeDeliveryMin !== undefined) cleanData.freeDeliveryMin = Number(cleanData.freeDeliveryMin);
+  if (cleanData.deliveryFee !== undefined) cleanData.deliveryFee = Number(cleanData.deliveryFee);
+
+  await setDoc(docRef, cleanData, { merge: true });
   return getStoreSettings();
 }
 
@@ -139,7 +146,11 @@ export async function createCategory(data: Partial<Category>): Promise<Category>
 
 export async function updateCategory(id: string, data: Partial<Category>): Promise<Category | null> {
   const docRef = doc(db, "categories", id);
-  await updateDoc(docRef, { ...data, updatedAt: new Date().toISOString() });
+  const cleanData: Record<string, any> = { updatedAt: new Date().toISOString() };
+  for (const [k, v] of Object.entries(data)) {
+    if (v !== undefined) cleanData[k] = v;
+  }
+  await updateDoc(docRef, cleanData);
   return getCategoryByIdOrSlug(id);
 }
 
@@ -309,10 +320,23 @@ export async function createProduct(data: Partial<Product>): Promise<Product> {
 
 export async function updateProduct(id: string, data: Partial<Product>): Promise<Product | null> {
   const docRef = doc(db, "products", id);
-  const cleanData: Record<string, any> = { ...data, updatedAt: new Date().toISOString() };
+  const cleanData: Record<string, any> = { updatedAt: new Date().toISOString() };
+  for (const [k, v] of Object.entries(data)) {
+    if (v !== undefined) cleanData[k] = v;
+  }
   if (cleanData.price !== undefined) cleanData.price = Number(cleanData.price);
-  if (cleanData.compareAtPrice !== undefined && cleanData.compareAtPrice !== null) cleanData.compareAtPrice = Number(cleanData.compareAtPrice);
+  if (cleanData.compareAtPrice !== undefined && cleanData.compareAtPrice !== null && cleanData.compareAtPrice !== "") {
+    cleanData.compareAtPrice = Number(cleanData.compareAtPrice);
+  } else if (cleanData.compareAtPrice === "") {
+    cleanData.compareAtPrice = null;
+  }
+  if (cleanData.costPrice !== undefined && cleanData.costPrice !== null && cleanData.costPrice !== "") {
+    cleanData.costPrice = Number(cleanData.costPrice);
+  } else if (cleanData.costPrice === "") {
+    cleanData.costPrice = null;
+  }
   if (cleanData.stock !== undefined) cleanData.stock = Number(cleanData.stock);
+  if (cleanData.lowStockThreshold !== undefined) cleanData.lowStockThreshold = Number(cleanData.lowStockThreshold);
 
   await updateDoc(docRef, cleanData);
   return getProductByIdOrSlug(id);
@@ -495,7 +519,8 @@ export async function createOrder(data: {
 export async function updateOrderStatus(
   orderId: string, 
   newStatus: OrderStatus, 
-  note?: string
+  note?: string,
+  paymentStatus?: string
 ): Promise<Order | null> {
   const order = await getOrderByIdOrNumber(orderId);
   if (!order) return null;
@@ -515,7 +540,9 @@ export async function updateOrderStatus(
     updatedAt: new Date().toISOString(),
   };
 
-  if (newStatus === "DELIVERED" && order.paymentMethod === "COD") {
+  if (paymentStatus) {
+    updates.paymentStatus = paymentStatus;
+  } else if (newStatus === "DELIVERED" && order.paymentMethod === "COD") {
     updates.paymentStatus = "PAID";
   }
 

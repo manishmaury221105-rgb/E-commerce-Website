@@ -17,35 +17,42 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<SafeUser | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  // Load cached user immediately on mount
-  useEffect(() => {
-    try {
-      const cached = localStorage.getItem("freshmart_auth_user");
-      if (cached) {
-        setUser(JSON.parse(cached));
-      }
-    } catch (e) {
-      console.warn("Auth cache read error:", e);
+  const [user, setUser] = useState<SafeUser | null>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const cached = localStorage.getItem("freshmart_auth_user");
+        if (cached) return JSON.parse(cached);
+      } catch (e) {}
     }
-  }, []);
+    return null;
+  });
+
+  const [isLoading, setIsLoading] = useState(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const cached = localStorage.getItem("freshmart_auth_user");
+        if (cached) return false;
+      } catch (e) {}
+    }
+    return true;
+  });
 
   const refreshUser = useCallback(async () => {
     try {
       const res = await fetch("/api/auth/me");
       if (res.ok) {
         const data = await res.json();
-        setUser(data.user);
-        try {
-          localStorage.setItem("freshmart_auth_user", JSON.stringify(data.user));
-        } catch (e) {}
-      } else {
-        setUser(null);
-        try {
-          localStorage.removeItem("freshmart_auth_user");
-        } catch (e) {}
+        if (data.user) {
+          setUser(data.user);
+          try {
+            localStorage.setItem("freshmart_auth_user", JSON.stringify(data.user));
+          } catch (e) {}
+        } else {
+          setUser(null);
+          try {
+            localStorage.removeItem("freshmart_auth_user");
+          } catch (e) {}
+        }
       }
     } catch (err) {
       // Keep cached user on temporary network drop

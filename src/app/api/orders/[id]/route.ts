@@ -27,9 +27,9 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     }
 
     const { id } = params;
-    const { orderStatus, note } = await req.json();
+    const { orderStatus, note, paymentStatus } = await req.json();
 
-    const updated = await updateOrderStatus(id, orderStatus, note);
+    const updated = await updateOrderStatus(id, orderStatus, note, paymentStatus);
     if (!updated) {
       return NextResponse.json({ error: "Order not found" }, { status: 404 });
     }

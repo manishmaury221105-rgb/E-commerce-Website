@@ -41,7 +41,7 @@ export default function AdminLayout({
     { href: "/admin/settings", label: "Store Settings", icon: Settings },
   ];
 
-  if (isLoading) {
+  if (isLoading && !user) {
     return (
       <div className="min-h-screen bg-slate-900 flex items-center justify-center text-white">
         <div className="text-center space-y-3">
