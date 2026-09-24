@@ -2,6 +2,22 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { getCurrentUserFromRequest } from "@/lib/auth";
 
+export const dynamic = "force-dynamic";
+
+const defaultSettingsFallback = {
+  id: "default",
+  shopName: "FreshMart Local Supermarket",
+  phone: "+91 73804 92118",
+  whatsapp: "+917380492118",
+  email: "help@freshmart.local",
+  address: "Shop #14, Main Market Square, Near Central Clock Tower",
+  currency: "₹",
+  freeDeliveryMin: 499,
+  deliveryFee: 40,
+  announcement: "⚡ Super Fast Local Delivery in under 45 mins! Use code WELCOME10 for 10% OFF",
+  openHours: "Mon - Sun: 7:00 AM - 10:30 PM",
+};
+
 export async function GET() {
   try {
     let settings = await prisma.storeSetting.findUnique({
@@ -24,9 +40,9 @@ export async function GET() {
       });
     }
 
-    return NextResponse.json({ settings });
+    return NextResponse.json({ settings: settings || defaultSettingsFallback });
   } catch (error) {
-    return NextResponse.json({ error: "Failed to fetch settings" }, { status: 500 });
+    return NextResponse.json({ settings: defaultSettingsFallback });
   }
 }
 
