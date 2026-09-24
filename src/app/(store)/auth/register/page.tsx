@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { ShoppingBag, Lock, Mail, User, Phone, ArrowRight } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/context/ToastContext";
+import GoogleSignInButton from "@/components/auth/GoogleSignInButton";
 
 export default function RegisterPage() {
   const { register } = useAuth();
@@ -126,6 +127,15 @@ export default function RegisterPage() {
             <ArrowRight className="w-4 h-4" />
           </button>
         </form>
+
+        <div className="relative flex py-1 items-center">
+          <div className="flex-grow border-t border-slate-200"></div>
+          <span className="flex-shrink mx-3 text-[11px] text-slate-400 font-medium uppercase tracking-wider">or</span>
+          <div className="flex-grow border-t border-slate-200"></div>
+        </div>
+
+        {/* Firebase Google Auth */}
+        <GoogleSignInButton redirectTo="/" text="Sign up with Google" />
 
         <div className="text-center text-xs text-slate-500 pt-2 border-t border-slate-100">
           Already have an account?{" "}

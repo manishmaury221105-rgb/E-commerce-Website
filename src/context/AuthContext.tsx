@@ -8,6 +8,7 @@ interface AuthContextType {
   isLoading: boolean;
   login: (email: string, password: string) => Promise<{ success: boolean; error?: string; user?: SafeUser }>;
   register: (name: string, email: string, password: string, phone?: string) => Promise<{ success: boolean; error?: string }>;
+  loginWithGoogle: (firebaseUser: any) => Promise<{ success: boolean; error?: string; user?: SafeUser }>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
   isAdmin: boolean;
@@ -59,6 +60,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const loginWithGoogle = async (firebaseUser: any) => {
+    try {
+      const res = await fetch("/api/auth/firebase-sync", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: firebaseUser.email,
+          name: firebaseUser.displayName,
+          phone: firebaseUser.phoneNumber,
+          uid: firebaseUser.uid,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) {
+        return { success: false, error: data.error || "Failed to sync user" };
+      }
+
+      setUser(data.user);
+      return { success: true, user: data.user };
+    } catch (err: any) {
+      return { success: false, error: err.message || "Network error" };
+    }
+  };
+
   const register = async (name: string, email: string, password: string, phone?: string) => {
     try {
       const res = await fetch("/api/auth/register", {
@@ -96,6 +122,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         user,
         isLoading,
         login,
+        loginWithGoogle,
         register,
         logout,
         refreshUser,
