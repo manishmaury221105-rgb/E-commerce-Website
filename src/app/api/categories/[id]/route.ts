@@ -39,12 +39,54 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
     }
 
     const { id } = params;
+
+    const category = await prisma.category.findUnique({
+      where: { id },
+      include: {
+        _count: { select: { products: true } },
+      },
+    });
+
+    if (!category) {
+      return NextResponse.json({ error: "Category not found" }, { status: 404 });
+    }
+
+    // Unlink child categories
+    await prisma.category.updateMany({
+      where: { parentId: id },
+      data: { parentId: null },
+    });
+
+    // If category has products, reassign them to another category
+    if (category._count.products > 0) {
+      let fallbackCategory = await prisma.category.findFirst({
+        where: { id: { not: id } },
+      });
+
+      if (!fallbackCategory) {
+        fallbackCategory = await prisma.category.create({
+          data: {
+            name: "General & Miscellaneous",
+            slug: "general-miscellaneous",
+            description: "General grocery and store items",
+            image: "https://images.unsplash.com/photo-1542838132-92c53300491e?w=600",
+          },
+        });
+      }
+
+      await prisma.product.updateMany({
+        where: { categoryId: id },
+        data: { categoryId: fallbackCategory.id },
+      });
+    }
+
     await prisma.category.delete({
       where: { id },
     });
 
-    return NextResponse.json({ message: "Category deleted" });
+    return NextResponse.json({ message: "Category deleted successfully" });
   } catch (error: any) {
-    return NextResponse.json({ error: "Failed to delete category" }, { status: 500 });
+    console.error("Delete Category Error:", error);
+    return NextResponse.json({ error: error.message || "Failed to delete category" }, { status: 500 });
   }
 }
