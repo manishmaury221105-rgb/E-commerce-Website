@@ -17,39 +17,23 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [user, setUser] = useState<SafeUser | null>(() => {
-    if (typeof window !== "undefined") {
-      try {
-        const cached = localStorage.getItem("freshmart_auth_user");
-        if (cached) return JSON.parse(cached);
-      } catch (e) {}
-    }
-    return null;
-  });
-
-  const [isLoading, setIsLoading] = useState(() => {
-    if (typeof window !== "undefined") {
-      try {
-        const cached = localStorage.getItem("freshmart_auth_user");
-        if (cached) return false;
-      } catch (e) {}
-    }
-    return true;
-  });
+  const [user, setUser] = useState<SafeUser | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   const refreshUser = useCallback(async () => {
     try {
-      const res = await fetch("/api/auth/me");
+      const res = await fetch("/api/auth/me", { cache: "no-store" });
       if (res.ok) {
         const data = await res.json();
         if (data.user) {
           setUser(data.user);
           try {
-            localStorage.setItem("freshmart_auth_user", JSON.stringify(data.user));
+            localStorage.setItem("chaitanya_auth_user", JSON.stringify(data.user));
           } catch (e) {}
         } else {
           setUser(null);
           try {
+            localStorage.removeItem("chaitanya_auth_user");
             localStorage.removeItem("freshmart_auth_user");
           } catch (e) {}
         }
@@ -62,6 +46,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   useEffect(() => {
+    // 1. Immediately read cached user on client mount
+    try {
+      const cached = localStorage.getItem("chaitanya_auth_user") || localStorage.getItem("freshmart_auth_user");
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        setUser(parsed);
+        setIsLoading(false);
+      }
+    } catch (e) {}
+
+    // 2. Validate session in background
     refreshUser();
   }, [refreshUser]);
 
@@ -80,7 +75,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       setUser(data.user);
       try {
-        localStorage.setItem("freshmart_auth_user", JSON.stringify(data.user));
+        localStorage.setItem("chaitanya_auth_user", JSON.stringify(data.user));
       } catch (e) {}
       return { success: true, user: data.user };
     } catch (err: any) {
@@ -108,7 +103,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       setUser(data.user);
       try {
-        localStorage.setItem("freshmart_auth_user", JSON.stringify(data.user));
+        localStorage.setItem("chaitanya_auth_user", JSON.stringify(data.user));
       } catch (e) {}
       return { success: true, user: data.user };
     } catch (err: any) {
@@ -131,7 +126,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       setUser(data.user);
       try {
-        localStorage.setItem("freshmart_auth_user", JSON.stringify(data.user));
+        localStorage.setItem("chaitanya_auth_user", JSON.stringify(data.user));
       } catch (e) {}
       return { success: true };
     } catch (err: any) {
@@ -144,6 +139,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await fetch("/api/auth/logout", { method: "POST" });
       setUser(null);
       try {
+        localStorage.removeItem("chaitanya_auth_user");
         localStorage.removeItem("freshmart_auth_user");
       } catch (e) {}
     } catch (err) {

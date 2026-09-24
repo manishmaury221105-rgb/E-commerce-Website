@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
@@ -29,19 +29,13 @@ export default function AdminLayout({
   const pathname = usePathname();
   const router = useRouter();
   const { user, logout, isAdmin, isLoading } = useAuth();
-  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
 
-  const navLinks = [
-    { href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
-    { href: "/admin/products", label: "Products & Stock", icon: Package },
-    { href: "/admin/categories", label: "Categories & Banners", icon: Layers },
-    { href: "/admin/orders", label: "Orders & Delivery", icon: ShoppingBag },
-    { href: "/admin/coupons", label: "Coupons & Discounts", icon: Tag },
-    { href: "/admin/customers", label: "Customers CRM", icon: Users },
-    { href: "/admin/settings", label: "Store Settings", icon: Settings },
-  ];
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
-  if (isLoading && !user) {
+  if (!mounted || (isLoading && !user)) {
     return (
       <div className="min-h-screen bg-slate-900 flex items-center justify-center text-white">
         <div className="text-center space-y-3">
@@ -68,8 +62,8 @@ export default function AdminLayout({
           </div>
           <div className="pt-2 flex flex-col gap-2">
             <Link
-              href="/auth/login"
-              className="bg-orange-600 hover:bg-orange-500 text-white font-bold text-xs py-3 rounded-xl transition-colors"
+              href="/auth/login?redirect=/admin"
+              className="bg-gradient-to-r from-orange-600 to-amber-600 hover:from-orange-700 hover:to-amber-700 text-white font-bold text-xs py-3 rounded-xl transition-all shadow-md shadow-orange-600/20"
             >
               Sign In to Admin Account
             </Link>
@@ -84,6 +78,18 @@ export default function AdminLayout({
       </div>
     );
   }
+
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+
+  const navLinks = [
+    { href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
+    { href: "/admin/products", label: "Products & Stock", icon: Package },
+    { href: "/admin/categories", label: "Categories & Banners", icon: Layers },
+    { href: "/admin/orders", label: "Orders & Delivery", icon: ShoppingBag },
+    { href: "/admin/coupons", label: "Coupons & Discounts", icon: Tag },
+    { href: "/admin/customers", label: "Customers CRM", icon: Users },
+    { href: "/admin/settings", label: "Store Settings", icon: Settings },
+  ];
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col md:flex-row">
