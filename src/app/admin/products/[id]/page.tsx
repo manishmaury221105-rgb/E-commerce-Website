@@ -36,21 +36,6 @@ export default function EditProductPage() {
   const [isFeatured, setIsFeatured] = useState(false);
   const [isDailyDeal, setIsDailyDeal] = useState(false);
 
-  const PHOTO_PRESETS = [
-    { label: "🍎 Apples", url: "https://images.unsplash.com/photo-1560806887-1e4cd0b6cbd6?w=800" },
-    { label: "🍌 Bananas", url: "https://images.unsplash.com/photo-1571771894821-ce9b6c11b08e?w=800" },
-    { label: "🥭 Mangoes", url: "https://images.unsplash.com/photo-1553279768-865429fa0078?w=800" },
-    { label: "🥔 Potatoes", url: "https://images.unsplash.com/photo-1518977676601-b53f82aba655?w=800" },
-    { label: "🍅 Tomatoes", url: "https://images.unsplash.com/photo-1592924357228-91a4daadcfea?w=800" },
-    { label: "🥛 Fresh Milk", url: "https://images.unsplash.com/photo-1563636619-e9143da7973b?w=800" },
-    { label: "🍞 Wheat Bread", url: "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=800" },
-    { label: "🌾 Basmati Rice", url: "https://images.unsplash.com/photo-1586201375761-83865001e31c?w=800" },
-    { label: "🥜 Almonds", url: "https://images.unsplash.com/photo-1508061253366-f7da158b6d46?w=800" },
-    { label: "🍟 Potato Chips", url: "https://images.unsplash.com/photo-1566478989037-eec170784d0b?w=800" },
-    { label: "🧃 Orange Juice", url: "https://images.unsplash.com/photo-1613478223719-2ab802602423?w=800" },
-    { label: "🧼 Dishwash Soap", url: "https://images.unsplash.com/photo-1585421514284-efb74c2b69ba?w=800" },
-  ];
-
   useEffect(() => {
     Promise.all([
       fetch("/api/categories").then((r) => r.json()),
@@ -520,25 +505,7 @@ export default function EditProductPage() {
               </div>
             </div>
 
-            {/* 3. 1-Click Quick Presets */}
-            <div>
-              <label className="block text-xs font-semibold text-slate-400 mb-1.5">
-                Option 3: Or 1-Click Preset Grocery Photos (Append)
-              </label>
-              <div className="grid grid-cols-3 sm:grid-cols-4 gap-1.5 max-h-28 overflow-y-auto pr-1">
-                {PHOTO_PRESETS.map((preset, idx) => (
-                  <button
-                    key={idx}
-                    type="button"
-                    onClick={() => setImages((prev) => [...prev, preset.url])}
-                    className="p-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-[11px] font-semibold text-slate-200 text-left truncate active:scale-95 transition-all"
-                  >
-                    + {preset.label}
-                  </button>
-                ))}
-              </div>
             </div>
-          </div>
 
           <div className="flex flex-wrap gap-6 pt-2 border-t border-slate-800">
             <label className="flex items-center gap-2 cursor-pointer select-none text-xs text-slate-200">

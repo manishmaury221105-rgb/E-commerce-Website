@@ -376,28 +376,6 @@ export default function AdminCategoriesPage() {
                 />
               </div>
 
-              <div>
-                <label className="block text-xs font-semibold text-slate-400 mb-1.5">
-                  Option 3: Or Pick 1-Click Banner Preset Photos
-                </label>
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
-                  {[
-                    { label: "🥦 Fresh Produce", url: "https://images.unsplash.com/photo-1542838132-92c53300491e?w=1200" },
-                    { label: "🛒 Supermarket Aisle", url: "https://images.unsplash.com/photo-1578916171728-46686eac8d58?w=1200" },
-                    { label: "🍳 Kitchen & Appliances", url: "https://images.unsplash.com/photo-1556911220-e15b29be8c8f?w=1200" },
-                    { label: "🥛 Dairy & Bakery", url: "https://images.unsplash.com/photo-1509440159596-0249088772ff?w=1200" },
-                  ].map((preset, idx) => (
-                    <button
-                      key={idx}
-                      type="button"
-                      onClick={() => setBannerImage(preset.url)}
-                      className="p-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 text-[11px] font-semibold text-slate-200 text-left truncate active:scale-95 transition-all"
-                    >
-                      {preset.label}
-                    </button>
-                  ))}
-                </div>
-              </div>
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
