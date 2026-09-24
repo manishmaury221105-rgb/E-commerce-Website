@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentUserFromRequest } from "@/lib/auth";
-import { prisma } from "@/lib/db";
+import { findUserById } from "@/lib/firestore-users";
 
 export const dynamic = "force-dynamic";
 
@@ -11,17 +11,7 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ user: null }, { status: 200 });
     }
 
-    const user = await prisma.user.findUnique({
-      where: { id: userPayload.userId },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        phone: true,
-        role: true,
-        createdAt: true,
-      },
-    });
+    const user = await findUserById(userPayload.userId);
 
     if (!user) {
       return NextResponse.json({ user: null }, { status: 200 });
@@ -29,9 +19,12 @@ export async function GET(req: NextRequest) {
 
     return NextResponse.json({
       user: {
-        ...user,
-        role: user.role as "CUSTOMER" | "ADMIN" | "STAFF",
-        createdAt: user.createdAt.toISOString(),
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        phone: user.phone,
+        role: user.role,
+        createdAt: user.createdAt,
       },
     });
   } catch (error) {

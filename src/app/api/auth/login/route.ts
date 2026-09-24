@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
+import { findUserByEmail } from "@/lib/firestore-users";
 import { comparePassword, signToken, AUTH_COOKIE_NAME } from "@/lib/auth";
+
+export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
   try {
@@ -10,15 +12,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Email and password are required" }, { status: 400 });
     }
 
-    const user = await prisma.user.findUnique({
-      where: { email: email.toLowerCase().trim() },
-    });
+    const cleanEmail = email.toLowerCase().trim();
+    const user = await findUserByEmail(cleanEmail);
 
-    if (!user) {
+    if (!user || !user.passwordHash) {
       return NextResponse.json({ error: "Invalid email or password" }, { status: 401 });
     }
 
-    const isMatch = await comparePassword(password, user.password);
+    const isMatch = await comparePassword(password, user.passwordHash);
     if (!isMatch) {
       return NextResponse.json({ error: "Invalid email or password" }, { status: 401 });
     }
@@ -38,7 +39,7 @@ export async function POST(req: NextRequest) {
         email: user.email,
         phone: user.phone,
         role: user.role,
-        createdAt: user.createdAt.toISOString(),
+        createdAt: user.createdAt,
       },
     });
 

@@ -1,65 +1,29 @@
 import React from "react";
 import { notFound } from "next/navigation";
-import { prisma } from "@/lib/db";
+import { getProductByIdOrSlug, getProducts, getProductReviews } from "@/lib/firestore-service";
 import { ProductDetailClient } from "./ProductDetailClient";
 import { Product } from "@/types";
 
 export const revalidate = 0;
 
 async function getProductData(slug: string) {
-  const product = await prisma.product.findFirst({
-    where: {
-      OR: [{ slug: slug }, { id: slug }],
-    },
-    include: {
-      category: true,
-      reviews: {
-        where: { isApproved: true },
-        orderBy: { createdAt: "desc" },
-      },
-    },
-  });
-
+  const product = await getProductByIdOrSlug(slug);
   if (!product) return null;
 
-  const related = await prisma.product.findMany({
-    where: {
-      categoryId: product.categoryId,
-      id: { not: product.id },
+  const [related, reviews] = await Promise.all([
+    getProducts({ categoryId: product.categoryId, limitCount: 5 }),
+    getProductReviews(product.id),
+  ]);
+
+  const filteredRelated = related.filter((p) => p.id !== product.id).slice(0, 4);
+
+  return {
+    product: {
+      ...product,
+      reviews,
     },
-    take: 4,
-    include: { category: true },
-  });
-
-  const parsedProduct: Product = {
-    ...product,
-    images: Array.isArray(product.images)
-      ? product.images
-      : typeof product.images === "string"
-      ? JSON.parse(product.images || "[]")
-      : [],
-    dealEndsAt: product.dealEndsAt ? product.dealEndsAt.toISOString() : null,
-    createdAt: product.createdAt.toISOString(),
-    updatedAt: product.updatedAt.toISOString(),
-    reviews: product.reviews.map((r) => ({
-      ...r,
-      createdAt: r.createdAt.toISOString(),
-    })),
+    related: filteredRelated,
   };
-
-  const parsedRelated: Product[] = related.map((p) => ({
-    ...p,
-    images: Array.isArray(p.images)
-      ? p.images
-      : typeof p.images === "string"
-      ? JSON.parse(p.images || "[]")
-      : [],
-    dealEndsAt: p.dealEndsAt ? p.dealEndsAt.toISOString() : null,
-    createdAt: p.createdAt.toISOString(),
-    updatedAt: p.updatedAt.toISOString(),
-  }));
-
-  return { product: parsedProduct, related: parsedRelated };
 }
 
 export async function generateMetadata({ params }: { params: { slug: string } }) {

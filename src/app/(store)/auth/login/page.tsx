@@ -1,21 +1,33 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { ShoppingBag, Lock, Mail, ArrowRight, ShieldCheck, UserCheck } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { ShoppingBag, Lock, Mail, ArrowRight, ShieldAlert } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { useToast } from "@/context/ToastContext";
 import GoogleSignInButton from "@/components/auth/GoogleSignInButton";
 
-export default function LoginPage() {
+function LoginForm() {
   const { login } = useAuth();
   const { success, error } = useToast();
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const redirectUrl = searchParams.get("redirect") || "";
+  const authError = searchParams.get("error");
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (authError === "admin_required") {
+      error("Administrator authentication required to access Admin Panel.");
+    } else if (authError === "unauthorized_role") {
+      error("Access denied. Your account does not have administrator privileges.");
+    }
+  }, [authError, error]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,19 +42,16 @@ export default function LoginPage() {
 
     if (res.success) {
       success(`Welcome back, ${res.user?.name}!`);
-      if (res.user?.role === "ADMIN" || res.user?.role === "STAFF") {
+      if (redirectUrl) {
+        router.push(redirectUrl);
+      } else if (res.user?.role === "ADMIN" || res.user?.role === "STAFF") {
         router.push("/admin");
       } else {
         router.push("/orders");
       }
     } else {
-      error(res.error || "Invalid credentials");
+      error(res.error || "Invalid email or password");
     }
-  };
-
-  const handleQuickLogin = (demoEmail: string, demoPass: string) => {
-    setEmail(demoEmail);
-    setPassword(demoPass);
   };
 
   return (
@@ -57,35 +66,16 @@ export default function LoginPage() {
             Sign In to FreshMart
           </h1>
           <p className="text-xs text-slate-500">
-            Access your orders, saved addresses & instant checkout
+            Access your orders, saved addresses & express checkout
           </p>
         </div>
 
-        {/* Demo Accounts Quick-Fill Box */}
-        <div className="bg-slate-50 p-3.5 rounded-2xl border border-slate-200/80 space-y-2 text-xs">
-          <p className="font-bold text-slate-700 flex items-center gap-1">
-            <UserCheck className="w-3.5 h-3.5 text-emerald-600" />
-            <span>Quick Demo Logins (1-Click Fill):</span>
-          </p>
-          <div className="grid grid-cols-2 gap-2">
-            <button
-              type="button"
-              onClick={() => handleQuickLogin("admin@localshop.com", "Admin@12345")}
-              className="p-2 rounded-xl bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold text-[11px] transition-colors text-left"
-            >
-              👑 Admin Demo
-              <span className="block font-normal text-[10px] text-amber-700">admin@localshop.com</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => handleQuickLogin("customer@localshop.com", "Customer@12345")}
-              className="p-2 rounded-xl bg-emerald-100 hover:bg-emerald-200 text-emerald-900 font-bold text-[11px] transition-colors text-left"
-            >
-              👤 Customer Demo
-              <span className="block font-normal text-[10px] text-emerald-700">customer@localshop.com</span>
-            </button>
+        {authError && (
+          <div className="p-3 bg-amber-50 border border-amber-200 rounded-xl flex items-center gap-2 text-xs text-amber-800">
+            <ShieldAlert className="w-4 h-4 flex-shrink-0 text-amber-600" />
+            <span>Admin privileges required to view that page.</span>
           </div>
-        </div>
+        )}
 
         {/* Login Form */}
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -105,7 +95,9 @@ export default function LoginPage() {
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">Password</label>
+            <div className="flex items-center justify-between mb-1">
+              <label className="block text-xs font-semibold text-slate-700">Password</label>
+            </div>
             <div className="relative">
               <input
                 type="password"
@@ -136,7 +128,7 @@ export default function LoginPage() {
         </div>
 
         {/* Firebase Google Auth */}
-        <GoogleSignInButton redirectTo="/orders" text="Sign in with Google" />
+        <GoogleSignInButton redirectTo={redirectUrl || "/orders"} text="Sign in with Google" />
 
         <div className="text-center text-xs text-slate-500 pt-2 border-t border-slate-100">
           Don't have an account yet?{" "}
@@ -146,5 +138,19 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="py-20 text-center">
+          <div className="w-8 h-8 border-4 border-emerald-600 border-t-transparent rounded-full animate-spin mx-auto" />
+        </div>
+      }
+    >
+      <LoginForm />
+    </Suspense>
   );
 }

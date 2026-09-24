@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
-import { hashPassword, signToken, AUTH_COOKIE_NAME } from "@/lib/auth";
+import { findUserByEmail, createFirestoreUser } from "@/lib/firestore-users";
+import { signToken, AUTH_COOKIE_NAME } from "@/lib/auth";
+
+export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
   try {
@@ -15,25 +17,18 @@ export async function POST(req: NextRequest) {
     }
 
     const cleanEmail = email.toLowerCase().trim();
-
-    const existingUser = await prisma.user.findUnique({
-      where: { email: cleanEmail },
-    });
+    const existingUser = await findUserByEmail(cleanEmail);
 
     if (existingUser) {
       return NextResponse.json({ error: "An account with this email already exists" }, { status: 409 });
     }
 
-    const hashedPassword = await hashPassword(password);
-
-    const newUser = await prisma.user.create({
-      data: {
-        name: name.trim(),
-        email: cleanEmail,
-        password: hashedPassword,
-        phone: phone ? phone.trim() : null,
-        role: "CUSTOMER",
-      },
+    const newUser = await createFirestoreUser({
+      name: name.trim(),
+      email: cleanEmail,
+      password,
+      phone: phone ? phone.trim() : undefined,
+      role: "CUSTOMER",
     });
 
     const token = signToken({
@@ -45,14 +40,7 @@ export async function POST(req: NextRequest) {
 
     const response = NextResponse.json({
       message: "Account created successfully",
-      user: {
-        id: newUser.id,
-        name: newUser.name,
-        email: newUser.email,
-        phone: newUser.phone,
-        role: newUser.role,
-        createdAt: newUser.createdAt.toISOString(),
-      },
+      user: newUser,
     });
 
     response.cookies.set({

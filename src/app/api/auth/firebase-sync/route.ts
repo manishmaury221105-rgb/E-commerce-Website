@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
-import { hashPassword, signToken, AUTH_COOKIE_NAME } from "@/lib/auth";
+import { findUserByEmail, createFirestoreUser } from "@/lib/firestore-users";
+import { signToken, AUTH_COOKIE_NAME } from "@/lib/auth";
+
+export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
   try {
@@ -13,22 +15,26 @@ export async function POST(req: NextRequest) {
     const cleanEmail = email.toLowerCase().trim();
     const displayName = name || cleanEmail.split("@")[0] || "User";
 
-    // Find or create user
-    let user = await prisma.user.findUnique({
-      where: { email: cleanEmail },
-    });
+    // Find or create user in Firestore
+    let user = await findUserByEmail(cleanEmail);
 
     if (!user) {
-      const dummyPassword = await hashPassword(`firebase-${uid || Date.now()}`);
-      user = await prisma.user.create({
-        data: {
-          email: cleanEmail,
-          name: displayName,
-          password: dummyPassword,
-          phone: phone || null,
-          role: "CUSTOMER",
-        },
+      const created = await createFirestoreUser({
+        name: displayName,
+        email: cleanEmail,
+        phone: phone || undefined,
+        role: "CUSTOMER",
+        id: uid || undefined,
       });
+      user = {
+        id: created.id,
+        name: created.name,
+        email: created.email,
+        phone: created.phone,
+        role: created.role,
+        createdAt: created.createdAt,
+        updatedAt: created.createdAt,
+      };
     }
 
     const token = signToken({
@@ -46,7 +52,7 @@ export async function POST(req: NextRequest) {
         email: user.email,
         phone: user.phone,
         role: user.role,
-        createdAt: user.createdAt.toISOString(),
+        createdAt: user.createdAt,
       },
     });
 
@@ -56,7 +62,7 @@ export async function POST(req: NextRequest) {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
-      maxAge: 7 * 24 * 60 * 60, // 7 days
+      maxAge: 7 * 24 * 60 * 60,
       path: "/",
     });
 

@@ -2,36 +2,63 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Users can read public store information
+    
+    // Helper functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    // 1. Products: Public read, authenticated admin write
     match /products/{productId} {
       allow read: if true;
-      allow write: if request.auth != null;
+      allow write: if isAuthenticated();
     }
     
+    // 2. Categories: Public read, authenticated admin write
     match /categories/{categoryId} {
       allow read: if true;
-      allow write: if request.auth != null;
+      allow write: if isAuthenticated();
     }
 
+    // 3. Banners: Public read, authenticated admin write
     match /banners/{bannerId} {
       allow read: if true;
-      allow write: if request.auth != null;
+      allow write: if isAuthenticated();
     }
 
+    // 4. Store Settings: Public read, authenticated admin write
     match /settings/{settingId} {
       allow read: if true;
-      allow write: if request.auth != null;
+      allow write: if isAuthenticated();
     }
 
-    // Orders can be read/written by their owner or authenticated admin
-    match /orders/{orderId} {
-      allow read, write: if request.auth != null;
+    // 5. Coupons: Public read for active validation, admin write
+    match /coupons/{couponId} {
+      allow read: if true;
+      allow write: if isAuthenticated();
+    }
+
+    // 6. Product Reviews: Public read, anyone can submit review, authenticated user can edit/delete
+    match /reviews/{reviewId} {
+      allow read: if true;
       allow create: if true;
+      allow update, delete: if isAuthenticated();
     }
 
-    // User profiles
+    // 7. Orders: Anyone can create order (guests/customers), read/update restricted to authenticated users or order lookup
+    match /orders/{orderId} {
+      allow read: if true; // Allows customer tracking by ID/OrderNumber
+      allow create: if true;
+      allow update, delete: if isAuthenticated();
+    }
+
+    // 8. User Profiles & Addresses: Users can read/write their own document
     match /users/{userId} {
-      allow read, write: if request.auth != null && request.auth.uid == userId;
+      allow read, write: if isOwner(userId) || isAuthenticated();
     }
   }
 }

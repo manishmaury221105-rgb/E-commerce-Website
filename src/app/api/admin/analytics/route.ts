@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
 import { getCurrentUserFromRequest } from "@/lib/auth";
+import { getOrders, getProducts } from "@/lib/firestore-service";
+import { getAllCustomers } from "@/lib/firestore-users";
 
 export const dynamic = "force-dynamic";
 
@@ -11,60 +12,45 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
+    const [allOrders, allProducts, allCustomers] = await Promise.all([
+      getOrders(),
+      getProducts(),
+      getAllCustomers(),
+    ]);
+
     // 1. Total revenue
-    const paidOrders = await prisma.order.findMany({
-      where: {
-        paymentStatus: "PAID",
-        orderStatus: { not: "CANCELLED" },
-      },
-      select: { total: true, createdAt: true },
-    });
+    const paidOrders = allOrders.filter(
+      (o) => (o.paymentStatus === "PAID" || o.orderStatus === "DELIVERED") && o.orderStatus !== "CANCELLED"
+    );
+    const totalRevenue = paidOrders.reduce((sum, o) => sum + (o.total || 0), 0);
 
-    const totalRevenue = paidOrders.reduce((sum, o) => sum + o.total, 0);
+    // 2. Order counts
+    const totalOrders = allOrders.length;
+    const pendingOrders = allOrders.filter((o) => o.orderStatus === "PENDING").length;
+    const activeOrders = allOrders.filter((o) =>
+      ["CONFIRMED", "PACKED", "OUT_FOR_DELIVERY"].includes(o.orderStatus)
+    ).length;
+    const deliveredOrders = allOrders.filter((o) => o.orderStatus === "DELIVERED").length;
 
-    // 2. Total orders count & status breakdown
-    const totalOrders = await prisma.order.count();
-    const pendingOrders = await prisma.order.count({ where: { orderStatus: "PENDING" } });
-    const activeOrders = await prisma.order.count({
-      where: { orderStatus: { in: ["CONFIRMED", "PACKED", "OUT_FOR_DELIVERY"] } },
-    });
-    const deliveredOrders = await prisma.order.count({ where: { orderStatus: "DELIVERED" } });
+    // 3. Customers count
+    const customerList = allCustomers.filter((c) => c.role === "CUSTOMER");
+    const totalCustomers = customerList.length;
 
-    // 3. Total customers
-    const totalCustomers = await prisma.user.count({ where: { role: "CUSTOMER" } });
-
-    // 4. Products count & low stock products
-    const totalProducts = await prisma.product.count();
-    const lowStockProducts = await prisma.product.findMany({
-      where: {
-        stock: { lte: 10 },
-      },
-      take: 6,
-      select: {
-        id: true,
-        name: true,
-        stock: true,
-        lowStockThreshold: true,
-        price: true,
-      },
-    });
+    // 4. Products & Low stock
+    const totalProducts = allProducts.length;
+    const lowStockProducts = allProducts
+      .filter((p) => (p.stock || 0) <= (p.lowStockThreshold || 10))
+      .slice(0, 6)
+      .map((p) => ({
+        id: p.id,
+        name: p.name,
+        stock: p.stock,
+        lowStockThreshold: p.lowStockThreshold || 5,
+        price: p.price,
+      }));
 
     // 5. Recent 6 orders
-    const recentOrders = await prisma.order.findMany({
-      orderBy: { createdAt: "desc" },
-      take: 6,
-      include: {
-        items: true,
-      },
-    });
-
-    const parsedRecentOrders = recentOrders.map((o) => ({
-      ...o,
-      shippingAddress: JSON.parse(o.shippingAddress || "{}"),
-      trackingHistory: JSON.parse(o.trackingHistory || "[]"),
-      createdAt: o.createdAt.toISOString(),
-      updatedAt: o.updatedAt.toISOString(),
-    }));
+    const recentOrders = allOrders.slice(0, 6);
 
     // 6. Sales trends for last 7 days
     const last7Days: { date: string; sales: number; orders: number }[] = [];
@@ -76,11 +62,11 @@ export async function GET(req: NextRequest) {
       nextD.setDate(d.getDate() + 1);
 
       const dayOrders = paidOrders.filter((o) => {
-        const orderDate = new Date(o.createdAt);
+        const orderDate = new Date(o.createdAt || 0);
         return orderDate >= d && orderDate < nextD;
       });
 
-      const daySales = dayOrders.reduce((sum, o) => sum + o.total, 0);
+      const daySales = dayOrders.reduce((sum, o) => sum + (o.total || 0), 0);
       const dateLabel = d.toLocaleDateString("en-IN", { month: "short", day: "numeric" });
 
       last7Days.push({
@@ -102,7 +88,7 @@ export async function GET(req: NextRequest) {
       },
       salesTrend: last7Days,
       lowStockProducts,
-      recentOrders: parsedRecentOrders,
+      recentOrders,
     });
   } catch (error: any) {
     console.error("Admin Analytics error:", error);

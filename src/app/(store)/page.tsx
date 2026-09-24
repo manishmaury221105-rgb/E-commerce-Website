@@ -1,6 +1,6 @@
 import React from "react";
 import Link from "next/link";
-import { prisma } from "@/lib/db";
+import { getBanners, getCategories, getProducts } from "@/lib/firestore-service";
 import { HeroBannerSlider } from "@/components/storefront/HeroBannerSlider";
 import { CategoryPills } from "@/components/storefront/CategoryPills";
 import { FeaturesRibbon } from "@/components/storefront/FeaturesRibbon";
@@ -14,58 +14,15 @@ export const revalidate = 0; // Dynamic data
 async function getHomePageData() {
   try {
     const [banners, categories, products] = await Promise.all([
-      prisma.banner.findMany({
-        where: { isActive: true },
-        orderBy: { order: "asc" },
-      }),
-      prisma.category.findMany({
-        orderBy: { order: "asc" },
-        include: {
-          _count: { select: { products: true } },
-        },
-      }),
-      prisma.product.findMany({
-        orderBy: { createdAt: "desc" },
-        include: {
-          category: true,
-        },
-      }),
+      getBanners(true),
+      getCategories(),
+      getProducts(),
     ]);
 
-    const parsedBanners: Banner[] = banners.map((b) => ({
-      ...b,
-    }));
-
-    const parsedCategories: Category[] = categories.map((c) => ({
-      ...c,
-      productCount: c._count?.products || 0,
-    }));
-
-    const parsedProducts: Product[] = products.map((p) => ({
-      ...p,
-      images: Array.isArray(p.images)
-        ? p.images
-        : typeof p.images === "string"
-        ? JSON.parse(p.images || "[]")
-        : [],
-      dealEndsAt: p.dealEndsAt ? p.dealEndsAt.toISOString() : null,
-      createdAt: p.createdAt.toISOString(),
-      updatedAt: p.updatedAt.toISOString(),
-      category: p.category
-        ? {
-            id: p.category.id,
-            name: p.category.name,
-            slug: p.category.slug,
-            isFeatured: p.category.isFeatured,
-            order: p.category.order,
-          }
-        : undefined,
-    }));
-
     return {
-      banners: parsedBanners,
-      categories: parsedCategories,
-      products: parsedProducts,
+      banners,
+      categories,
+      products,
     };
   } catch (error) {
     console.error("Home page data fetch error:", error);

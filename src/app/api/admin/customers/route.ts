@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
 import { getCurrentUserFromRequest } from "@/lib/auth";
+import { getAllCustomers, findUserById } from "@/lib/firestore-users";
+import { getOrders } from "@/lib/firestore-service";
 
 export const dynamic = "force-dynamic";
 
@@ -11,50 +12,37 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
     }
 
-    const customers = await prisma.user.findMany({
-      where: { role: "CUSTOMER" },
-      orderBy: { createdAt: "desc" },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        phone: true,
-        role: true,
-        createdAt: true,
-        orders: {
-          select: {
-            id: true,
-            total: true,
-            orderStatus: true,
-            paymentStatus: true,
-          },
-        },
-        addresses: {
-          where: { isDefault: true },
-          take: 1,
-        },
-      },
-    });
+    const customers = await getAllCustomers();
+    const allOrders = await getOrders();
 
-    const parsed = customers.map((c) => {
-      const totalSpend = c.orders
-        .filter((o) => o.paymentStatus === "PAID" || o.orderStatus === "DELIVERED")
-        .reduce((sum, o) => sum + o.total, 0);
+    const parsed = await Promise.all(
+      customers
+        .filter((c) => c.role === "CUSTOMER")
+        .map(async (c) => {
+          const userOrders = allOrders.filter((o) => o.userId === c.id || o.customerEmail === c.email);
+          const totalSpend = userOrders
+            .filter((o) => o.paymentStatus === "PAID" || o.orderStatus === "DELIVERED")
+            .reduce((sum, o) => sum + o.total, 0);
 
-      return {
-        id: c.id,
-        name: c.name,
-        email: c.email,
-        phone: c.phone,
-        totalOrders: c.orders.length,
-        totalSpend,
-        defaultAddress: c.addresses[0] || null,
-        joinedDate: c.createdAt.toISOString(),
-      };
-    });
+          const fullUser = await findUserById(c.id);
+          const defaultAddress = fullUser?.addresses?.find((a) => a.isDefault) || fullUser?.addresses?.[0] || null;
+
+          return {
+            id: c.id,
+            name: c.name,
+            email: c.email,
+            phone: c.phone,
+            totalOrders: userOrders.length,
+            totalSpend,
+            defaultAddress,
+            joinedDate: c.createdAt || new Date().toISOString(),
+          };
+        })
+    );
 
     return NextResponse.json({ customers: parsed });
   } catch (error: any) {
+    console.error("Admin customers GET error:", error);
     return NextResponse.json({ error: "Failed to fetch customers" }, { status: 500 });
   }
 }

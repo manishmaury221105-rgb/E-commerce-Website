@@ -1,26 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
+import { getCategories, createCategory } from "@/lib/firestore-service";
 import { getCurrentUserFromRequest } from "@/lib/auth";
+
+export const dynamic = "force-dynamic";
 
 export async function GET() {
   try {
-    const categories = await prisma.category.findMany({
-      orderBy: { order: "asc" },
-      include: {
-        _count: {
-          select: { products: true },
-        },
-      },
-    });
-
-    const parsed = categories.map((c) => ({
-      ...c,
-      productCount: c._count.products,
-      createdAt: c.createdAt.toISOString(),
-      updatedAt: c.updatedAt.toISOString(),
-    }));
-
-    return NextResponse.json({ categories: parsed });
+    const categories = await getCategories();
+    return NextResponse.json({ categories });
   } catch (error: any) {
     return NextResponse.json({ error: "Failed to fetch categories" }, { status: 500 });
   }
@@ -40,23 +27,14 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Category name is required" }, { status: 400 });
     }
 
-    const generatedSlug =
-      (slug && slug.trim()) ||
-      name
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, "-")
-        .replace(/(^-|-$)/g, "");
-
-    const category = await prisma.category.create({
-      data: {
-        name: name.trim(),
-        slug: generatedSlug,
-        description,
-        image,
-        icon: icon || "ShoppingBag",
-        isFeatured: Boolean(isFeatured),
-        order: parseInt(order) || 0,
-      },
+    const category = await createCategory({
+      name: name.trim(),
+      slug,
+      description,
+      image,
+      icon: icon || "ShoppingBag",
+      isFeatured: isFeatured !== undefined ? Boolean(isFeatured) : true,
+      order: order ? parseInt(order) : 0,
     });
 
     return NextResponse.json({ category }, { status: 201 });

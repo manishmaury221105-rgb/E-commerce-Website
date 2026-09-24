@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
+import { validateCoupon } from "@/lib/firestore-service";
+
+export const dynamic = "force-dynamic";
 
 export async function POST(req: NextRequest) {
   try {
@@ -9,40 +11,23 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Please enter a coupon code" }, { status: 400 });
     }
 
-    const coupon = await prisma.coupon.findUnique({
-      where: { code: code.trim().toUpperCase() },
-    });
+    const result = await validateCoupon(code, Number(subtotal) || 0);
 
-    if (!coupon || !coupon.isActive) {
-      return NextResponse.json({ error: "Invalid or inactive promo code" }, { status: 404 });
-    }
-
-    if (coupon.expiresAt && new Date(coupon.expiresAt) < new Date()) {
-      return NextResponse.json({ error: "This promo code has expired" }, { status: 400 });
-    }
-
-    if (coupon.usageLimit && coupon.usageCount >= coupon.usageLimit) {
-      return NextResponse.json({ error: "Promo code limit reached" }, { status: 400 });
-    }
-
-    if (subtotal < coupon.minOrderAmount) {
-      return NextResponse.json(
-        {
-          error: `Minimum order amount of ₹${coupon.minOrderAmount} required for this coupon`,
-        },
-        { status: 400 }
-      );
+    if (!result.valid || !result.coupon) {
+      return NextResponse.json({ error: result.message || "Invalid coupon code" }, { status: 400 });
     }
 
     return NextResponse.json({
       coupon: {
-        id: coupon.id,
-        code: coupon.code,
-        discountType: coupon.discountType,
-        discountValue: coupon.discountValue,
-        minOrderAmount: coupon.minOrderAmount,
-        maxDiscountAmount: coupon.maxDiscountAmount,
+        id: result.coupon.id,
+        code: result.coupon.code,
+        discountType: result.coupon.discountType,
+        discountValue: result.coupon.discountValue,
+        minOrderAmount: result.coupon.minOrderAmount,
+        maxDiscountAmount: result.coupon.maxDiscountAmount,
       },
+      discountAmount: result.discountAmount,
+      message: result.message,
     });
   } catch (error: any) {
     return NextResponse.json({ error: "Failed to validate coupon" }, { status: 500 });

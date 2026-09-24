@@ -1,19 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
+import { deleteBanner } from "@/lib/firestore-service";
+import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { db } from "@/lib/firebase";
 import { getCurrentUserFromRequest } from "@/lib/auth";
+
+export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest, { params }: { params: { id: string } }) {
   try {
     const { id } = params;
-    const banner = await prisma.banner.findUnique({
-      where: { id },
-    });
+    const docRef = doc(db, "banners", id);
+    const snap = await getDoc(docRef);
 
-    if (!banner) {
+    if (!snap.exists()) {
       return NextResponse.json({ error: "Banner not found" }, { status: 404 });
     }
 
-    return NextResponse.json({ banner });
+    return NextResponse.json({ banner: { id: snap.id, ...snap.data() } });
   } catch (error) {
     return NextResponse.json({ error: "Failed to fetch banner" }, { status: 500 });
   }
@@ -28,22 +31,15 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
 
     const { id } = params;
     const body = await req.json();
+    const docRef = doc(db, "banners", id);
 
-    const updated = await prisma.banner.update({
-      where: { id },
-      data: {
-        title: body.title !== undefined ? body.title : undefined,
-        subtitle: body.subtitle !== undefined ? body.subtitle : undefined,
-        tag: body.tag !== undefined ? body.tag : undefined,
-        image: body.image !== undefined ? body.image : undefined,
-        link: body.link !== undefined ? body.link : undefined,
-        buttonText: body.buttonText !== undefined ? body.buttonText : undefined,
-        isActive: body.isActive !== undefined ? Boolean(body.isActive) : undefined,
-        order: body.order !== undefined ? parseInt(body.order) : undefined,
-      },
+    await updateDoc(docRef, {
+      ...body,
+      updatedAt: new Date().toISOString(),
     });
 
-    return NextResponse.json({ banner: updated });
+    const snap = await getDoc(docRef);
+    return NextResponse.json({ banner: { id: snap.id, ...snap.data() } });
   } catch (error: any) {
     return NextResponse.json({ error: "Failed to update banner" }, { status: 500 });
   }
@@ -57,9 +53,7 @@ export async function DELETE(req: NextRequest, { params }: { params: { id: strin
     }
 
     const { id } = params;
-    await prisma.banner.delete({
-      where: { id },
-    });
+    await deleteBanner(id);
 
     return NextResponse.json({ message: "Banner deleted successfully" });
   } catch (error: any) {

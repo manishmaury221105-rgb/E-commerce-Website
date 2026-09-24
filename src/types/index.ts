@@ -22,6 +22,8 @@ export interface Address {
   country: string;
   isDefault: boolean;
   label: "HOME" | "WORK" | "OTHER";
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface Category {
@@ -35,6 +37,8 @@ export interface Category {
   order: number;
   parentId?: string | null;
   productCount?: number;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface ProductReview {

@@ -1,7 +1,14 @@
 import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/lib/db";
+import { 
+  getOrders, 
+  createOrder, 
+  getProductByIdOrSlug, 
+  getStoreSettings, 
+  validateCoupon 
+} from "@/lib/firestore-service";
 import { getCurrentUserFromRequest } from "@/lib/auth";
-import { generateOrderNumber } from "@/lib/utils";
+
+export const dynamic = "force-dynamic";
 
 export async function GET(req: NextRequest) {
   try {
@@ -9,74 +16,32 @@ export async function GET(req: NextRequest) {
     const { searchParams } = new URL(req.url);
     const status = searchParams.get("status");
 
-    // If Admin/Staff: fetch all orders with filters
+    // If Admin/Staff: fetch all orders with status filter
     if (userPayload && (userPayload.role === "ADMIN" || userPayload.role === "STAFF")) {
-      const where: any = {};
-      if (status && status !== "ALL") where.orderStatus = status;
-
-      const orders = await prisma.order.findMany({
-        where,
-        orderBy: { createdAt: "desc" },
-        include: {
-          items: true,
-        },
-      });
-
-      const parsed = orders.map((o) => ({
-        ...o,
-        shippingAddress: JSON.parse(o.shippingAddress || "{}"),
-        trackingHistory: JSON.parse(o.trackingHistory || "[]"),
-        createdAt: o.createdAt.toISOString(),
-        updatedAt: o.updatedAt.toISOString(),
-      }));
-
-      return NextResponse.json({ orders: parsed });
+      let orders = await getOrders();
+      if (status && status !== "ALL") {
+        orders = orders.filter((o) => o.orderStatus === status);
+      }
+      return NextResponse.json({ orders });
     }
 
     // Customer: fetch their own orders
     if (userPayload) {
-      const orders = await prisma.order.findMany({
-        where: { userId: userPayload.userId },
-        orderBy: { createdAt: "desc" },
-        include: {
-          items: true,
-        },
-      });
-
-      const parsed = orders.map((o) => ({
-        ...o,
-        shippingAddress: JSON.parse(o.shippingAddress || "{}"),
-        trackingHistory: JSON.parse(o.trackingHistory || "[]"),
-        createdAt: o.createdAt.toISOString(),
-        updatedAt: o.updatedAt.toISOString(),
-      }));
-
-      return NextResponse.json({ orders: parsed });
+      const orders = await getOrders(userPayload.userId);
+      return NextResponse.json({ orders });
     }
 
-    // Guest lookup by email or phone if provided in query
+    // Guest lookup by email or phone
     const guestEmail = searchParams.get("email");
     const guestPhone = searchParams.get("phone");
     if (guestEmail || guestPhone) {
-      const where: any = {};
-      if (guestEmail) where.customerEmail = guestEmail;
-      if (guestPhone) where.customerPhone = guestPhone;
-
-      const orders = await prisma.order.findMany({
-        where,
-        orderBy: { createdAt: "desc" },
-        include: { items: true },
-      });
-
-      const parsed = orders.map((o) => ({
-        ...o,
-        shippingAddress: JSON.parse(o.shippingAddress || "{}"),
-        trackingHistory: JSON.parse(o.trackingHistory || "[]"),
-        createdAt: o.createdAt.toISOString(),
-        updatedAt: o.updatedAt.toISOString(),
-      }));
-
-      return NextResponse.json({ orders: parsed });
+      const allOrders = await getOrders();
+      const guestOrders = allOrders.filter(
+        (o) =>
+          (guestEmail && o.customerEmail.toLowerCase() === guestEmail.toLowerCase().trim()) ||
+          (guestPhone && o.customerPhone === guestPhone.trim())
+      );
+      return NextResponse.json({ orders: guestOrders });
     }
 
     return NextResponse.json({ orders: [] });
@@ -107,9 +72,11 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Incomplete order details" }, { status: 400 });
     }
 
-    // Calculate subtotal and verify items against database
+    // Calculate subtotal and verify items against Firestore
     let calculatedSubtotal = 0;
     const validatedItems: Array<{
+      id: string;
+      orderId: string;
       productId: string;
       productName: string;
       productImage: string | null;
@@ -120,9 +87,7 @@ export async function POST(req: NextRequest) {
     }> = [];
 
     for (const item of items) {
-      const product = await prisma.product.findUnique({
-        where: { id: item.productId },
-      });
+      const product = await getProductByIdOrSlug(item.productId);
 
       if (!product) {
         return NextResponse.json({ error: `Product "${item.name}" is no longer available` }, { status: 400 });
@@ -138,16 +103,12 @@ export async function POST(req: NextRequest) {
       const itemTotal = product.price * item.quantity;
       calculatedSubtotal += itemTotal;
 
-      const productImages = Array.isArray(product.images)
-        ? product.images
-        : typeof product.images === "string"
-        ? JSON.parse(product.images || "[]")
-        : [];
-
       validatedItems.push({
+        id: `item-${Date.now().toString(36)}-${Math.random().toString(36).substring(2, 6)}`,
+        orderId: "",
         productId: product.id,
         productName: product.name,
-        productImage: productImages[0] || null,
+        productImage: Array.isArray(product.images) && product.images.length > 0 ? product.images[0] : null,
         price: product.price,
         quantity: item.quantity,
         unit: product.unit,
@@ -156,7 +117,7 @@ export async function POST(req: NextRequest) {
     }
 
     // Settings for delivery fee & threshold
-    const storeSettings = await prisma.storeSetting.findUnique({ where: { id: "default" } });
+    const storeSettings = await getStoreSettings();
     const freeDeliveryThreshold = storeSettings?.freeDeliveryMin || 499;
     const defaultDeliveryFee = storeSettings?.deliveryFee || 40;
     const deliveryFee = calculatedSubtotal >= freeDeliveryThreshold ? 0 : defaultDeliveryFee;
@@ -166,102 +127,37 @@ export async function POST(req: NextRequest) {
     let validCouponCode = null;
 
     if (couponCode) {
-      const coupon = await prisma.coupon.findUnique({
-        where: { code: couponCode.trim().toUpperCase() },
-      });
-
-      if (coupon && coupon.isActive && calculatedSubtotal >= coupon.minOrderAmount) {
-        validCouponCode = coupon.code;
-        if (coupon.discountType === "PERCENTAGE") {
-          discountAmount = (calculatedSubtotal * coupon.discountValue) / 100;
-          if (coupon.maxDiscountAmount && discountAmount > coupon.maxDiscountAmount) {
-            discountAmount = coupon.maxDiscountAmount;
-          }
-        } else {
-          discountAmount = coupon.discountValue;
-        }
-
-        // Increment coupon count
-        await prisma.coupon.update({
-          where: { id: coupon.id },
-          data: { usageCount: { increment: 1 } },
-        });
+      const couponRes = await validateCoupon(couponCode, calculatedSubtotal);
+      if (couponRes.valid && couponRes.coupon) {
+        validCouponCode = couponRes.coupon.code;
+        discountAmount = couponRes.discountAmount || 0;
       }
     }
 
     const total = Math.max(0, calculatedSubtotal - discountAmount + deliveryFee);
-    const orderNumber = generateOrderNumber();
-    const invoiceNumber = `INV-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
 
-    const isOnlinePayment = paymentMethod !== "COD";
-    const paymentStatus = isOnlinePayment ? "PAID" : "PENDING";
-
-    const initialTracking = [
-      {
-        status: "PENDING",
-        timestamp: new Date().toISOString(),
-        note: isOnlinePayment
-          ? `Order placed successfully with online payment (${paymentMethod}).`
-          : "Order placed successfully with Cash on Delivery.",
-      },
-    ];
-
-    // Create Order with Transaction
-    const order = await prisma.$transaction(async (tx) => {
-      // 1. Create the Order
-      const newOrder = await tx.order.create({
-        data: {
-          orderNumber,
-          userId: userPayload?.userId || null,
-          customerName: customerName.trim(),
-          customerEmail: (customerEmail || "").trim().toLowerCase(),
-          customerPhone: customerPhone.trim(),
-          shippingAddress: typeof shippingAddress === "string" ? shippingAddress : JSON.stringify(shippingAddress),
-          deliverySlot: deliverySlot || "⚡ Express Delivery (Within 2 Hours)",
-          notes: notes || null,
-          subtotal: calculatedSubtotal,
-          deliveryFee,
-          discountAmount,
-          couponCode: validCouponCode,
-          total,
-          paymentMethod: paymentMethod || "COD",
-          paymentStatus,
-          orderStatus: "PENDING",
-          trackingHistory: JSON.stringify(initialTracking),
-          invoiceNumber,
-          items: {
-            create: validatedItems,
-          },
-        },
-        include: {
-          items: true,
-        },
-      });
-
-      // 2. Reduce product inventory
-      for (const item of validatedItems) {
-        if (item.productId) {
-          await tx.product.update({
-            where: { id: item.productId },
-            data: {
-              stock: { decrement: item.quantity },
-            },
-          });
-        }
-      }
-
-      return newOrder;
+    // Create Order in Firestore
+    const order = await createOrder({
+      userId: userPayload?.userId || null,
+      customerName: customerName.trim(),
+      customerEmail: (customerEmail || "").trim().toLowerCase(),
+      customerPhone: customerPhone.trim(),
+      shippingAddress: typeof shippingAddress === "string" ? JSON.parse(shippingAddress) : shippingAddress,
+      deliverySlot: deliverySlot || "⚡ Express Delivery (Within 2 Hours)",
+      notes: notes || null,
+      items: validatedItems,
+      subtotal: calculatedSubtotal,
+      deliveryFee,
+      discountAmount,
+      couponCode: validCouponCode,
+      total,
+      paymentMethod: paymentMethod || "COD",
     });
 
     return NextResponse.json(
       {
         message: "Order placed successfully!",
-        order: {
-          ...order,
-          shippingAddress: JSON.parse(order.shippingAddress),
-          trackingHistory: JSON.parse(order.trackingHistory),
-          createdAt: order.createdAt.toISOString(),
-        },
+        order,
       },
       { status: 201 }
     );
