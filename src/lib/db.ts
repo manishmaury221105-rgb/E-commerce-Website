@@ -1,11 +1,9 @@
 import { PrismaClient } from "@prisma/client";
 
-// Ensure DATABASE_URL is never empty to prevent build-time Prisma datasource validation errors
+// Ensure DATABASE_URL is set for runtime & build time
 if (!process.env.DATABASE_URL || process.env.DATABASE_URL.trim() === "") {
   process.env.DATABASE_URL = "file:./dev.db";
 }
-
-const dbUrl = process.env.DATABASE_URL || "file:./dev.db";
 
 const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined;
@@ -16,7 +14,7 @@ export const prisma =
   new PrismaClient({
     datasources: {
       db: {
-        url: dbUrl,
+        url: process.env.DATABASE_URL || "file:./dev.db",
       },
     },
     log: process.env.NODE_ENV === "development" ? ["warn", "error"] : ["error"],
