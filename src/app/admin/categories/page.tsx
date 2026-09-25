@@ -18,8 +18,8 @@ import {
   Loader2,
 } from "lucide-react";
 import { useToast } from "@/context/ToastContext";
-import { Category, Banner } from "@/types";
-import { subscribeToCategories, subscribeToBanners } from "@/lib/firestore-service";
+import { Category, Banner, Product } from "@/types";
+import { subscribeToCategories, subscribeToBanners, subscribeToProducts } from "@/lib/firestore-service";
 import { processAndUploadImage } from "@/lib/image-utils";
 
 const CATEGORY_PRESETS = [
@@ -42,6 +42,7 @@ export default function AdminCategoriesPage() {
 
   const [categories, setCategories] = useState<Category[]>([]);
   const [banners, setBanners] = useState<Banner[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
   // New Category State
@@ -85,9 +86,14 @@ export default function AdminCategoriesPage() {
       setBanners(liveBanners);
     });
 
+    const unsubProds = subscribeToProducts((liveProds) => {
+      setProducts(liveProds);
+    });
+
     return () => {
       unsubCats();
       unsubBanners();
+      unsubProds();
     };
   }, []);
 
@@ -618,8 +624,13 @@ export default function AdminCategoriesPage() {
                   <p className="text-[11px] text-slate-400 mt-0.5 truncate font-mono">
                     /{cat.slug}
                   </p>
-                  <p className="text-[10px] text-emerald-400 mt-0.5">
-                    {cat.productCount || 0} products
+                  <p className="text-[10px] text-emerald-400 mt-0.5 font-medium">
+                    {
+                      products.filter(
+                        (p) => p.categoryId === cat.id || p.categoryId === cat.slug
+                      ).length
+                    }{" "}
+                    products
                   </p>
                 </div>
               </div>

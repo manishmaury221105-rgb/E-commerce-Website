@@ -49,11 +49,9 @@ export function CategoryPills({ categories }: CategoryPillsProps) {
             <h3 className="text-[11px] sm:text-xs font-bold text-slate-800 dark:text-slate-200 group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors line-clamp-2 leading-tight">
               {cat.name}
             </h3>
-            {cat.productCount !== undefined && (
-              <span className="text-[9px] sm:text-[10px] text-slate-400 dark:text-slate-500 font-medium mt-0.5 hidden sm:inline">
-                {cat.productCount} items
-              </span>
-            )}
+            <span className="text-[9px] sm:text-[10px] text-slate-400 dark:text-slate-500 font-medium mt-0.5">
+              {cat.productCount ?? 0} {(cat.productCount === 1 ? "item" : "items")}
+            </span>
           </Link>
         ))}
       </div>

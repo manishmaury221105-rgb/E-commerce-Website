@@ -55,8 +55,24 @@ export function HomePageLive({
   }, []);
 
   const featuredProducts = products.filter((p) => p.isFeatured && p.isActive !== false);
-  const groceryProducts = products.filter((p) => p.category?.slug === "grocery-staples" && p.isActive !== false);
-  const freshFruits = products.filter((p) => p.category?.slug === "fruits-vegetables" && p.isActive !== false);
+  const groceryProducts = products.filter((p) => (p.category?.slug === "grocery-staples" || p.categoryId === "grocery-staples") && p.isActive !== false);
+  const freshFruits = products.filter((p) => (p.category?.slug === "fruits-vegetables" || p.categoryId === "fruits-vegetables") && p.isActive !== false);
+
+  // Dynamically compute real-time product count for each category
+  const categoriesWithCounts = categories.map((cat) => {
+    const count = products.filter(
+      (p) =>
+        p.isActive !== false &&
+        (p.categoryId === cat.id ||
+          p.categoryId === cat.slug ||
+          p.category?.id === cat.id ||
+          p.category?.slug === cat.slug)
+    ).length;
+    return {
+      ...cat,
+      productCount: count,
+    };
+  });
 
   return (
     <div className="space-y-8 pb-12">
@@ -67,7 +83,7 @@ export function HomePageLive({
       <FeaturesRibbon />
 
       {/* 3. Categories Grid */}
-      <CategoryPills categories={categories} />
+      <CategoryPills categories={categoriesWithCounts} />
 
       {/* 4. Daily Deals with Live Timer */}
       <DailyDealsSection products={products.filter((p) => p.isActive !== false)} />

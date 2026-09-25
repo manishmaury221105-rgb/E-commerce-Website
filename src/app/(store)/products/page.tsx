@@ -56,10 +56,11 @@ function ProductsContent() {
   const products = allProducts
     .filter((p) => {
       if (selectedCategory) {
-        const cat = categories.find((c) => c.slug === selectedCategory);
-        if (p.categoryId !== selectedCategory && (!cat || p.categoryId !== cat.id)) {
-          return false;
-        }
+        const cat = categories.find((c) => (Boolean(c.slug) && c.slug === selectedCategory) || c.id === selectedCategory);
+        const matchCat =
+          p.categoryId === selectedCategory ||
+          (cat && (p.categoryId === cat.id || (Boolean(cat.slug) && p.categoryId === cat.slug)));
+        if (!matchCat) return false;
       }
       if (searchQuery.trim()) {
         const term = searchQuery.toLowerCase().trim();
@@ -108,7 +109,7 @@ function ProductsContent() {
         <div>
           <h1 className="font-heading font-extrabold text-lg sm:text-2xl text-slate-900 dark:text-white tracking-tight">
             {selectedCategory
-              ? categories.find((c) => c.slug === selectedCategory)?.name || "Category Products"
+              ? categories.find((c) => (Boolean(c.slug) && c.slug === selectedCategory) || c.id === selectedCategory)?.name || "Category Products"
               : searchQuery
               ? `Search Results for "${searchQuery}"`
               : onlyDeals
@@ -224,20 +225,23 @@ function ProductsContent() {
                 <span>All Categories</span>
                 {selectedCategory === "" && <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />}
               </button>
-              {categories.map((cat) => (
-                <button
-                  key={cat.id}
-                  onClick={() => setSelectedCategory(cat.slug)}
-                  className={`w-full text-left px-3 py-1.5 rounded-xl transition-colors font-medium flex items-center justify-between ${
-                    selectedCategory === cat.slug
-                      ? "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 font-bold"
-                      : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800"
-                  }`}
-                >
-                  <span className="truncate">{cat.name}</span>
-                  {selectedCategory === cat.slug && <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />}
-                </button>
-              ))}
+              {categories.map((cat) => {
+                const isSelected = selectedCategory !== "" && ((Boolean(cat.slug) && selectedCategory === cat.slug) || selectedCategory === cat.id);
+                return (
+                  <button
+                    key={cat.id}
+                    onClick={() => setSelectedCategory(isSelected ? "" : (cat.slug || cat.id))}
+                    className={`w-full text-left px-3 py-1.5 rounded-xl transition-colors font-medium flex items-center justify-between ${
+                      isSelected
+                        ? "bg-emerald-50 dark:bg-emerald-950/60 text-emerald-800 dark:text-emerald-300 font-bold"
+                        : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800"
+                    }`}
+                  >
+                    <span className="truncate">{cat.name}</span>
+                    {isSelected && <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
@@ -360,23 +364,28 @@ function ProductsContent() {
                   <div className="space-y-1 text-xs max-h-48 overflow-y-auto">
                     <button
                       onClick={() => setSelectedCategory("")}
-                      className={`w-full text-left px-3 py-1.5 rounded-xl font-medium ${
+                      className={`w-full text-left px-3 py-1.5 rounded-xl font-medium flex items-center justify-between ${
                         selectedCategory === "" ? "bg-emerald-50 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 font-bold" : "text-slate-600 dark:text-slate-400"
                       }`}
                     >
-                      All Categories
+                      <span>All Categories</span>
+                      {selectedCategory === "" && <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />}
                     </button>
-                    {categories.map((c) => (
-                      <button
-                        key={c.id}
-                        onClick={() => setSelectedCategory(c.slug)}
-                        className={`w-full text-left px-3 py-1.5 rounded-xl font-medium ${
-                          selectedCategory === c.slug ? "bg-emerald-50 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 font-bold" : "text-slate-600 dark:text-slate-400"
-                        }`}
-                      >
-                        {c.name}
-                      </button>
-                    ))}
+                    {categories.map((c) => {
+                      const isSelected = selectedCategory !== "" && ((Boolean(c.slug) && selectedCategory === c.slug) || selectedCategory === c.id);
+                      return (
+                        <button
+                          key={c.id}
+                          onClick={() => setSelectedCategory(isSelected ? "" : (c.slug || c.id))}
+                          className={`w-full text-left px-3 py-1.5 rounded-xl font-medium flex items-center justify-between ${
+                            isSelected ? "bg-emerald-50 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 font-bold" : "text-slate-600 dark:text-slate-400"
+                          }`}
+                        >
+                          <span className="truncate">{c.name}</span>
+                          {isSelected && <Check className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />}
+                        </button>
+                      );
+                    })}
                   </div>
                 </div>
 

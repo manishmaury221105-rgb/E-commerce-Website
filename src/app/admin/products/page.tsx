@@ -413,8 +413,44 @@ export default function AdminProductsPage() {
                       </td>
 
                       {/* Category */}
-                      <td className="p-4 text-slate-400">
-                        {prod.category?.name || "Uncategorized"}
+                      <td className="p-4">
+                        <select
+                          value={
+                            categories.find(
+                              (c) => c.id === prod.categoryId || c.slug === prod.categoryId
+                            )?.id || prod.categoryId || ""
+                          }
+                          onChange={async (e) => {
+                            const newCatId = e.target.value;
+                            try {
+                              const res = await fetch(`/api/products/${prod.id}`, {
+                                method: "PUT",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({ categoryId: newCatId }),
+                              });
+                              if (res.ok) {
+                                setAllProducts((prev) =>
+                                  prev.map((p) =>
+                                    p.id === prod.id ? { ...p, categoryId: newCatId } : p
+                                  )
+                                );
+                                success("Category updated!");
+                              } else {
+                                error("Failed to update category");
+                              }
+                            } catch (err) {
+                              error("Failed to update category");
+                            }
+                          }}
+                          className="bg-slate-800 border border-slate-700 rounded-lg px-2.5 py-1 text-xs text-slate-200 focus:outline-none focus:border-emerald-500 cursor-pointer max-w-[150px] truncate"
+                        >
+                          <option value="">Select Category</option>
+                          {categories.map((c) => (
+                            <option key={c.id} value={c.id}>
+                              {c.name}
+                            </option>
+                          ))}
+                        </select>
                       </td>
 
                       {/* Price with Real-time Quick Edit */}
