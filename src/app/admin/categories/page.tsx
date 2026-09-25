@@ -499,10 +499,10 @@ export default function AdminCategoriesPage() {
                         <Upload className="w-6 h-6 text-emerald-400 group-hover:scale-110 transition-transform mb-1.5" />
                       )}
                       <span className="text-xs font-bold text-slate-200">
-                        {isUploadingPhoto ? "Compressing & Processing..." : "Click to Choose Photo from Device / Gallery"}
+                        {isUploadingPhoto ? "Optimizing & Compressing Photo..." : "Click to Choose Photo from Device / Gallery"}
                       </span>
-                      <span className="text-[11px] text-slate-400 mt-0.5">
-                        Supports JPG, PNG, WEBP (Auto-optimized for instant fast loading)
+                      <span className="text-[11px] text-emerald-400 font-medium mt-0.5">
+                        Supports 5MB, 10MB+ photos (JPG, PNG, WEBP) — Auto-optimized for instant fast saving
                       </span>
                     </label>
                   </div>
@@ -798,8 +798,8 @@ export default function AdminCategoriesPage() {
                         <span className="text-xs font-bold text-slate-200">
                           {isEditUploadingPhoto ? "Optimizing Photo..." : "Upload New Photo from Device"}
                         </span>
-                        <span className="text-[10px] text-slate-400">
-                          Click to select a photo from your computer/mobile
+                        <span className="text-[10px] text-emerald-400 font-medium">
+                          Supports 5MB, 10MB+ photos (Auto-compressed)
                         </span>
                       </label>
                     </div>
