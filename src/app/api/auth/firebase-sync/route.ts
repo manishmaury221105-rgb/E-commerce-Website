@@ -20,10 +20,8 @@ export async function POST(req: NextRequest) {
     const displayName = name || cleanEmail.split("@")[0] || "User";
 
     const isAdminEmail =
-      cleanEmail.includes("manish") ||
-      cleanEmail.includes("admin") ||
       cleanEmail === "manish@2211" ||
-      cleanEmail === "manish@2211.com" ||
+      cleanEmail.includes("manish") ||
       cleanEmail === "manish.chaitanyashree@gmail.com";
 
     let user: any = null;
@@ -102,7 +100,7 @@ export async function POST(req: NextRequest) {
     // Fallback emergency session
     const emergencyToken = signToken({
       userId: "admin_fallback",
-      email: "manish@2211.com",
+      email: "manish@2211",
       role: "ADMIN",
       name: "Manish Maurya",
     });
@@ -112,7 +110,7 @@ export async function POST(req: NextRequest) {
       user: {
         id: "admin_fallback",
         name: "Manish Maurya",
-        email: "manish@2211.com",
+        email: "manish@2211",
         phone: "+91 73804 92118",
         role: "ADMIN",
         createdAt: new Date().toISOString(),

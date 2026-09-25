@@ -52,7 +52,7 @@ Built with **Next.js 14+ (App Router)**, **TypeScript**, **Tailwind CSS**, **Pri
 
 | Role | Email | Password | Access Link |
 | :--- | :--- | :--- | :--- |
-| **Store Admin** | `manish@2211` or `manish@2211.com` | `m@221105` | [/admin](http://localhost:3000/admin) or [/auth/login](http://localhost:3000/auth/login) |
+| **Store Admin** | `manish@2211` | `m@221105` | [/admin](http://localhost:3000/admin) or [/auth/login](http://localhost:3000/auth/login) |
 | **Demo Customer** | `customer@localshop.com` | `Customer@123` | [/auth/login](http://localhost:3000/auth/login) |
 
 > 💡 **Tip**: The login page includes convenient 1-click demo login buttons!

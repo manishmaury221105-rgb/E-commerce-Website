@@ -37,16 +37,12 @@ export async function findUserByEmail(email: string): Promise<FirestoreUserData 
     let q = query(colRef, where("email", "==", cleanEmail), limit(1));
     let snap = await getDocs(q);
     
-    if (snap.empty && (cleanEmail === "manish@2211" || cleanEmail === "manish@2211.com")) {
-      q = query(colRef, where("email", "in", ["manish@2211", "manish@2211.com"]), limit(1));
+    if (snap.empty && cleanEmail === "manish@2211") {
+      q = query(colRef, where("email", "==", "manish@2211"), limit(1));
       snap = await getDocs(q);
       if (snap.empty) {
         return createAdminDemoUser();
       }
-    } else if (snap.empty && (cleanEmail === "admin@localshop.com" || cleanEmail === "admin@chaitanya.com")) {
-      return createAdminDemoUser();
-    } else if (snap.empty && cleanEmail === "customer@chaitanya.com") {
-      return createCustomerDemoUser();
     }
 
     if (snap.empty) {
@@ -308,7 +304,7 @@ async function createAdminDemoUser(): Promise<FirestoreUserData> {
   const passwordHash = await hashPassword("m@221105");
   const adminData = {
     name: "Manish Maurya (Admin)",
-    email: "manish@2211.com",
+    email: "manish@2211",
     passwordHash,
     phone: "+91 73804 92118",
     role: "ADMIN" as UserRole,

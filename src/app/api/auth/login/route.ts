@@ -16,13 +16,13 @@ export async function POST(req: NextRequest) {
 
     // 1. Direct Admin Fast-Pass
     if (
-      (cleanEmail === "manish@2211" || cleanEmail === "manish@2211.com" || cleanEmail === "admin@freshmart.local" || cleanEmail === "admin@chaitanya.com") &&
-      (password === "m@221105" || password === "admin123")
+      cleanEmail === "manish@2211" &&
+      password === "m@221105"
     ) {
       const adminUser = {
         id: "admin_master_id",
         name: "Manish Maurya (Admin)",
-        email: "manish@2211.com",
+        email: "manish@2211",
         phone: "+91 73804 92118",
         role: "ADMIN" as const,
         createdAt: new Date().toISOString(),
