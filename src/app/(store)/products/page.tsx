@@ -32,7 +32,7 @@ function ProductsContent() {
   const [onlyDeals, setOnlyDeals] = useState(searchParams.get("deal") === "true");
   const [onlyFeatured, setOnlyFeatured] = useState(searchParams.get("featured") === "true");
   const [onlyInStock, setOnlyInStock] = useState(false);
-  const [maxPrice, setMaxPrice] = useState<number>(1000);
+  const [maxPrice, setMaxPrice] = useState<number>(50000);
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
 
   // Real-time categories & products listeners
@@ -89,7 +89,7 @@ function ProductsContent() {
     setOnlyDeals(false);
     setOnlyFeatured(false);
     setOnlyInStock(false);
-    setMaxPrice(1000);
+    setMaxPrice(50000);
     router.push("/products");
   };
 
@@ -99,7 +99,7 @@ function ProductsContent() {
     onlyDeals ||
     onlyFeatured ||
     onlyInStock ||
-    maxPrice < 1000;
+    maxPrice < 50000;
 
   return (
     <div className="space-y-4 sm:space-y-6 pb-20 md:pb-12">
@@ -245,20 +245,20 @@ function ProductsContent() {
           <div className="pt-3 border-t border-slate-100 dark:border-slate-800">
             <div className="flex justify-between items-center text-xs mb-2">
               <span className="font-bold text-slate-800 dark:text-slate-200 uppercase tracking-wider">Max Price</span>
-              <span className="font-extrabold text-emerald-700 dark:text-emerald-400">₹{maxPrice}</span>
+              <span className="font-extrabold text-emerald-700 dark:text-emerald-400">₹{maxPrice.toLocaleString("en-IN")}</span>
             </div>
             <input
               type="range"
-              min="50"
-              max="1000"
-              step="25"
+              min="500"
+              max="50000"
+              step="500"
               value={maxPrice}
               onChange={(e) => setMaxPrice(parseInt(e.target.value))}
               className="w-full accent-emerald-600 cursor-pointer"
             />
             <div className="flex justify-between text-[10px] text-slate-400 dark:text-slate-500 mt-1">
-              <span>₹50</span>
-              <span>₹1,000+</span>
+              <span>₹500</span>
+              <span>₹50,000+</span>
             </div>
           </div>
 
@@ -384,17 +384,21 @@ function ProductsContent() {
                 <div>
                   <div className="flex justify-between text-xs mb-1">
                     <span className="font-bold text-slate-800 dark:text-slate-200">Max Price</span>
-                    <span className="font-bold text-emerald-700 dark:text-emerald-400">₹{maxPrice}</span>
+                    <span className="font-bold text-emerald-700 dark:text-emerald-400">₹{maxPrice.toLocaleString("en-IN")}</span>
                   </div>
                   <input
                     type="range"
-                    min="50"
-                    max="1000"
-                    step="25"
+                    min="500"
+                    max="50000"
+                    step="500"
                     value={maxPrice}
                     onChange={(e) => setMaxPrice(parseInt(e.target.value))}
                     className="w-full accent-emerald-600"
                   />
+                  <div className="flex justify-between text-[10px] text-slate-400 dark:text-slate-500 mt-1">
+                    <span>₹500</span>
+                    <span>₹50,000+</span>
+                  </div>
                 </div>
 
                 {/* Toggles */}
