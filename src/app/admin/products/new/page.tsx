@@ -6,6 +6,7 @@ import Link from "next/link";
 import { ArrowLeft, Save, Package } from "lucide-react";
 import { useToast } from "@/context/ToastContext";
 import { Category } from "@/types";
+import { processAndUploadImage } from "@/lib/image-utils";
 
 export default function NewProductPage() {
   const router = useRouter();
@@ -60,21 +61,21 @@ export default function NewProductPage() {
     }
   };
 
-  const handleMultipleUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleMultipleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
-    Array.from(files).forEach((file) => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        if (typeof reader.result === "string") {
-          const result = reader.result;
-          setImages((prev) => [...prev, result]);
-        }
-      };
-      reader.readAsDataURL(file);
-    });
+    const fileList = Array.from(files);
     e.target.value = "";
+
+    for (const file of fileList) {
+      try {
+        const compressed = await processAndUploadImage(file, "products", 800, 800);
+        setImages((prev) => [...prev, compressed]);
+      } catch (err) {
+        console.error("Error processing image:", err);
+      }
+    }
   };
 
   const handleAddUrl = () => {

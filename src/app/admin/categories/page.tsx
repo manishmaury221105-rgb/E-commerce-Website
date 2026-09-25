@@ -15,10 +15,12 @@ import {
   ArrowRight,
   FolderPlus,
   RefreshCw,
+  Loader2,
 } from "lucide-react";
 import { useToast } from "@/context/ToastContext";
 import { Category, Banner } from "@/types";
 import { subscribeToCategories, subscribeToBanners } from "@/lib/firestore-service";
+import { processAndUploadImage } from "@/lib/image-utils";
 
 const CATEGORY_PRESETS = [
   { name: "Fruits & Vegetables", image: "https://images.unsplash.com/photo-1610832958506-aa56368176cf?w=600&auto=format&fit=crop" },
@@ -48,6 +50,7 @@ export default function AdminCategoriesPage() {
   const [catImage, setCatImage] = useState("");
   const [catDescription, setCatDescription] = useState("");
   const [isAddingCat, setIsAddingCat] = useState(false);
+  const [isUploadingPhoto, setIsUploadingPhoto] = useState(false);
   const [photoSourceTab, setPhotoSourceTab] = useState<"upload" | "presets" | "url">("upload");
   const catFileInputRef = useRef<HTMLInputElement>(null);
 
@@ -57,6 +60,7 @@ export default function AdminCategoriesPage() {
   const [editCatSlug, setEditCatSlug] = useState("");
   const [editCatImage, setEditCatImage] = useState("");
   const [editCatDescription, setEditCatDescription] = useState("");
+  const [isEditUploadingPhoto, setIsEditUploadingPhoto] = useState(false);
   const [editPhotoSourceTab, setEditPhotoSourceTab] = useState<"upload" | "presets" | "url">("upload");
   const editFileInputRef = useRef<HTMLInputElement>(null);
   const [isUpdating, setIsUpdating] = useState(false);
@@ -68,6 +72,7 @@ export default function AdminCategoriesPage() {
   const [bannerImage, setBannerImage] = useState("");
   const [bannerLink, setBannerLink] = useState("/products");
   const [isAddingBanner, setIsAddingBanner] = useState(false);
+  const [isUploadingBannerPhoto, setIsUploadingBannerPhoto] = useState(false);
   const [bannerPhotoSourceTab, setBannerPhotoSourceTab] = useState<"upload" | "url">("upload");
 
   useEffect(() => {
@@ -87,7 +92,7 @@ export default function AdminCategoriesPage() {
   }, []);
 
   // Handle Photo File Upload for New Category
-  const handleCategoryFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleCategoryFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -96,23 +101,21 @@ export default function AdminCategoriesPage() {
       return;
     }
 
-    if (file.size > 5 * 1024 * 1024) {
-      error("Image size is too large (max 5MB)");
-      return;
+    setIsUploadingPhoto(true);
+    try {
+      const processedUrl = await processAndUploadImage(file, "categories", 600, 600);
+      setCatImage(processedUrl);
+      success("Photo processed and ready!");
+    } catch (err) {
+      console.error("Photo processing error:", err);
+      error("Failed to process photo. Please try another image.");
+    } finally {
+      setIsUploadingPhoto(false);
     }
-
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      if (typeof reader.result === "string") {
-        setCatImage(reader.result);
-        success("Photo selected from device.");
-      }
-    };
-    reader.readAsDataURL(file);
   };
 
   // Handle Photo File Upload for Edit Category
-  const handleEditCategoryFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleEditCategoryFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -121,19 +124,17 @@ export default function AdminCategoriesPage() {
       return;
     }
 
-    if (file.size > 5 * 1024 * 1024) {
-      error("Image size is too large (max 5MB)");
-      return;
+    setIsEditUploadingPhoto(true);
+    try {
+      const processedUrl = await processAndUploadImage(file, "categories", 600, 600);
+      setEditCatImage(processedUrl);
+      success("Photo updated successfully!");
+    } catch (err) {
+      console.error("Photo processing error:", err);
+      error("Failed to process photo.");
+    } finally {
+      setIsEditUploadingPhoto(false);
     }
-
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      if (typeof reader.result === "string") {
-        setEditCatImage(reader.result);
-        success("New photo loaded.");
-      }
-    };
-    reader.readAsDataURL(file);
   };
 
   const handleCreateCategory = async (e: React.FormEvent) => {
@@ -143,13 +144,19 @@ export default function AdminCategoriesPage() {
       return;
     }
 
+    const finalSlug = (catSlug || catName)
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/(^-|-$)/g, "");
+
     try {
       const res = await fetch("/api/categories", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: catName.trim(),
-          slug: catSlug || undefined,
+          slug: finalSlug,
           image: catImage || "https://images.unsplash.com/photo-1542838132-92c53300491e?w=600",
           description: catDescription,
           isFeatured: true,
@@ -187,12 +194,18 @@ export default function AdminCategoriesPage() {
 
     setIsUpdating(true);
     try {
+      const finalSlug = (editCatSlug || editCatName)
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-|-$)/g, "");
+
       const res = await fetch(`/api/categories/${editingCategory.id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           name: editCatName.trim(),
-          slug: editCatSlug.trim(),
+          slug: finalSlug,
           image: editCatImage,
           description: editCatDescription,
         }),
@@ -343,17 +356,16 @@ export default function AdminCategoriesPage() {
                   required
                   value={catName}
                   onChange={(e) => {
-                    setCatName(e.target.value);
-                    if (!catSlug || catSlug === "") {
-                      setCatSlug(
-                        e.target.value
-                          .toLowerCase()
-                          .replace(/[^a-z0-9]+/g, "-")
-                          .replace(/(^-|-$)/g, "")
-                      );
-                    }
+                    const newName = e.target.value;
+                    setCatName(newName);
+                    setCatSlug(
+                      newName
+                        .toLowerCase()
+                        .replace(/[^a-z0-9]+/g, "-")
+                        .replace(/(^-|-$)/g, "")
+                    );
                   }}
-                  placeholder="e.g. Organic Farm Spices"
+                  placeholder="e.g. Sarees & Ethnic Wear"
                   className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
                 />
               </div>
@@ -364,7 +376,7 @@ export default function AdminCategoriesPage() {
                   type="text"
                   value={catSlug}
                   onChange={(e) => setCatSlug(e.target.value)}
-                  placeholder="organic-farm-spices"
+                  placeholder="sarees-ethnic-wear"
                   className="w-full bg-slate-900 border border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-slate-300 font-mono placeholder:text-slate-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
                 />
               </div>
@@ -423,8 +435,10 @@ export default function AdminCategoriesPage() {
               <div className="grid grid-cols-1 md:grid-cols-12 gap-4 items-center">
                 {/* Image Preview Box */}
                 <div className="md:col-span-4 flex items-center gap-3 bg-slate-800/80 p-3 rounded-xl border border-slate-700">
-                  <div className="w-16 h-16 rounded-xl overflow-hidden bg-slate-900 border-2 border-emerald-500/80 shadow-md flex-shrink-0 relative group">
-                    {catImage ? (
+                  <div className="w-16 h-16 rounded-xl overflow-hidden bg-slate-900 border-2 border-emerald-500/80 shadow-md flex-shrink-0 relative group flex items-center justify-center">
+                    {isUploadingPhoto ? (
+                      <Loader2 className="w-6 h-6 text-emerald-400 animate-spin" />
+                    ) : catImage ? (
                       <img
                         src={catImage}
                         alt="Category preview"
@@ -441,12 +455,12 @@ export default function AdminCategoriesPage() {
                   </div>
                   <div className="min-w-0 flex-1">
                     <p className="text-xs font-bold text-white truncate">
-                      {catImage ? "Photo Selected" : "No Photo Chosen"}
+                      {isUploadingPhoto ? "Processing..." : catImage ? "Photo Selected" : "No Photo Chosen"}
                     </p>
                     <p className="text-[11px] text-slate-400 mt-0.5">
-                      {catImage ? "Ready to save" : "Upload or pick a photo"}
+                      {isUploadingPhoto ? "Optimizing image size" : catImage ? "Ready to save (Optimized)" : "Upload or pick a photo"}
                     </p>
-                    {catImage && (
+                    {catImage && !isUploadingPhoto && (
                       <button
                         type="button"
                         onClick={() => {
@@ -471,17 +485,24 @@ export default function AdminCategoriesPage() {
                       onChange={handleCategoryFileUpload}
                       className="hidden"
                       id="category-file-upload"
+                      disabled={isUploadingPhoto}
                     />
                     <label
                       htmlFor="category-file-upload"
-                      className="flex flex-col items-center justify-center p-4 border-2 border-dashed border-slate-700 hover:border-emerald-500 bg-slate-800/60 hover:bg-slate-800 rounded-xl cursor-pointer transition-all group text-center"
+                      className={`flex flex-col items-center justify-center p-4 border-2 border-dashed border-slate-700 hover:border-emerald-500 bg-slate-800/60 hover:bg-slate-800 rounded-xl cursor-pointer transition-all group text-center ${
+                        isUploadingPhoto ? "opacity-50 pointer-events-none" : ""
+                      }`}
                     >
-                      <Upload className="w-6 h-6 text-emerald-400 group-hover:scale-110 transition-transform mb-1.5" />
+                      {isUploadingPhoto ? (
+                        <Loader2 className="w-6 h-6 text-emerald-400 animate-spin mb-1.5" />
+                      ) : (
+                        <Upload className="w-6 h-6 text-emerald-400 group-hover:scale-110 transition-transform mb-1.5" />
+                      )}
                       <span className="text-xs font-bold text-slate-200">
-                        Click to Choose Photo from Device / Gallery
+                        {isUploadingPhoto ? "Compressing & Processing..." : "Click to Choose Photo from Device / Gallery"}
                       </span>
                       <span className="text-[11px] text-slate-400 mt-0.5">
-                        Supports JPG, PNG, WEBP, GIF (Up to 5MB)
+                        Supports JPG, PNG, WEBP (Auto-optimized for instant fast loading)
                       </span>
                     </label>
                   </div>
@@ -549,7 +570,8 @@ export default function AdminCategoriesPage() {
             <div className="flex items-center gap-3 pt-2">
               <button
                 type="submit"
-                className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-6 py-2.5 rounded-xl shadow-lg shadow-emerald-600/20 transition-all flex items-center gap-1.5"
+                disabled={isUploadingPhoto}
+                className="bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-bold text-xs px-6 py-2.5 rounded-xl shadow-lg shadow-emerald-600/20 transition-all flex items-center gap-1.5"
               >
                 <Plus className="w-4 h-4" />
                 <span>Save Category</span>
@@ -652,7 +674,9 @@ export default function AdminCategoriesPage() {
                     type="text"
                     required
                     value={editCatName}
-                    onChange={(e) => setEditCatName(e.target.value)}
+                    onChange={(e) => {
+                      setEditCatName(e.target.value);
+                    }}
                     className="w-full bg-slate-800 border border-slate-700 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-emerald-500"
                   />
                 </div>
@@ -719,19 +743,25 @@ export default function AdminCategoriesPage() {
                 {/* Preview & Edit Tab Content */}
                 <div className="grid grid-cols-1 sm:grid-cols-12 gap-3 items-center">
                   <div className="sm:col-span-4 flex items-center gap-3 bg-slate-900/90 p-3 rounded-xl border border-slate-700">
-                    <div className="w-14 h-14 rounded-xl overflow-hidden bg-slate-800 border-2 border-emerald-500 flex-shrink-0">
-                      <img
-                        src={editCatImage || "https://images.unsplash.com/photo-1542838132-92c53300491e?w=600"}
-                        alt="Edit preview"
-                        className="w-full h-full object-cover"
-                        onError={(e) => {
-                          (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1542838132-92c53300491e?w=600";
-                        }}
-                      />
+                    <div className="w-14 h-14 rounded-xl overflow-hidden bg-slate-800 border-2 border-emerald-500 flex-shrink-0 flex items-center justify-center">
+                      {isEditUploadingPhoto ? (
+                        <Loader2 className="w-5 h-5 text-emerald-400 animate-spin" />
+                      ) : (
+                        <img
+                          src={editCatImage || "https://images.unsplash.com/photo-1542838132-92c53300491e?w=600"}
+                          alt="Edit preview"
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1542838132-92c53300491e?w=600";
+                          }}
+                        />
+                      )}
                     </div>
                     <div className="min-w-0">
-                      <p className="text-[11px] font-bold text-white">Current Photo</p>
-                      {editCatImage && (
+                      <p className="text-[11px] font-bold text-white">
+                        {isEditUploadingPhoto ? "Processing..." : "Current Photo"}
+                      </p>
+                      {editCatImage && !isEditUploadingPhoto && (
                         <button
                           type="button"
                           onClick={() => setEditCatImage("")}
@@ -752,14 +782,21 @@ export default function AdminCategoriesPage() {
                         onChange={handleEditCategoryFileUpload}
                         className="hidden"
                         id="edit-category-file-upload"
+                        disabled={isEditUploadingPhoto}
                       />
                       <label
                         htmlFor="edit-category-file-upload"
-                        className="flex flex-col items-center justify-center p-3 border-2 border-dashed border-slate-700 hover:border-emerald-500 bg-slate-900/60 rounded-xl cursor-pointer transition-all group text-center"
+                        className={`flex flex-col items-center justify-center p-3 border-2 border-dashed border-slate-700 hover:border-emerald-500 bg-slate-900/60 rounded-xl cursor-pointer transition-all group text-center ${
+                          isEditUploadingPhoto ? "opacity-50 pointer-events-none" : ""
+                        }`}
                       >
-                        <Upload className="w-5 h-5 text-emerald-400 mb-1" />
+                        {isEditUploadingPhoto ? (
+                          <Loader2 className="w-5 h-5 text-emerald-400 animate-spin mb-1" />
+                        ) : (
+                          <Upload className="w-5 h-5 text-emerald-400 mb-1" />
+                        )}
                         <span className="text-xs font-bold text-slate-200">
-                          Upload New Photo from Device
+                          {isEditUploadingPhoto ? "Optimizing Photo..." : "Upload New Photo from Device"}
                         </span>
                         <span className="text-[10px] text-slate-400">
                           Click to select a photo from your computer/mobile
@@ -829,7 +866,7 @@ export default function AdminCategoriesPage() {
                 </button>
                 <button
                   type="submit"
-                  disabled={isUpdating}
+                  disabled={isUpdating || isEditUploadingPhoto}
                   className="bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-bold text-xs px-6 py-2 rounded-xl shadow-lg shadow-emerald-600/20 transition-all flex items-center gap-1.5"
                 >
                   {isUpdating ? <RefreshCw className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
@@ -867,15 +904,19 @@ export default function AdminCategoriesPage() {
 
             {/* Live Banner Preview Box */}
             <div className="flex items-center gap-4 bg-slate-900/90 p-4 rounded-2xl border border-slate-700">
-              <div className="w-32 h-18 rounded-xl overflow-hidden bg-slate-800 border-2 border-emerald-500 shadow-md flex-shrink-0">
-                <img
-                  src={bannerImage || "https://images.unsplash.com/photo-1542838132-92c53300491e?w=800"}
-                  alt="Banner preview"
-                  className="w-full h-full object-cover"
-                  onError={(e) => {
-                    (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1542838132-92c53300491e?w=800";
-                  }}
-                />
+              <div className="w-32 h-18 rounded-xl overflow-hidden bg-slate-800 border-2 border-emerald-500 shadow-md flex-shrink-0 flex items-center justify-center">
+                {isUploadingBannerPhoto ? (
+                  <Loader2 className="w-6 h-6 text-emerald-400 animate-spin" />
+                ) : (
+                  <img
+                    src={bannerImage || "https://images.unsplash.com/photo-1542838132-92c53300491e?w=800"}
+                    alt="Banner preview"
+                    className="w-full h-full object-cover"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = "https://images.unsplash.com/photo-1542838132-92c53300491e?w=800";
+                    }}
+                  />
+                )}
               </div>
               <div className="space-y-1 text-xs">
                 <p className="font-bold text-white">Banner Live Preview</p>
@@ -949,17 +990,20 @@ export default function AdminCategoriesPage() {
                   <input
                     type="file"
                     accept="image/*"
-                    onChange={(e) => {
+                    disabled={isUploadingBannerPhoto}
+                    onChange={async (e) => {
                       const file = e.target.files?.[0];
                       if (file) {
-                        const reader = new FileReader();
-                        reader.onloadend = () => {
-                          if (typeof reader.result === "string") {
-                            setBannerImage(reader.result);
-                            success("Banner photo loaded.");
-                          }
-                        };
-                        reader.readAsDataURL(file);
+                        setIsUploadingBannerPhoto(true);
+                        try {
+                          const url = await processAndUploadImage(file, "banners", 1200, 600);
+                          setBannerImage(url);
+                          success("Banner photo loaded.");
+                        } catch (err) {
+                          error("Failed to process banner photo.");
+                        } finally {
+                          setIsUploadingBannerPhoto(false);
+                        }
                       }
                     }}
                     className="w-full text-xs text-slate-400 file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-emerald-600 file:text-white hover:file:bg-emerald-500 cursor-pointer bg-slate-800 rounded-xl p-1 border border-slate-700"
@@ -1005,7 +1049,8 @@ export default function AdminCategoriesPage() {
             <div className="flex items-center gap-3 pt-2">
               <button
                 type="submit"
-                className="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-6 py-2.5 rounded-xl shadow-lg shadow-emerald-600/20 transition-all"
+                disabled={isUploadingBannerPhoto}
+                className="bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-bold text-xs px-6 py-2.5 rounded-xl shadow-lg shadow-emerald-600/20 transition-all"
               >
                 Publish Banner
               </button>

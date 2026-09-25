@@ -18,6 +18,7 @@ import { formatCurrency } from "@/lib/utils";
 import { useToast } from "@/context/ToastContext";
 import { Product, Category } from "@/types";
 import { subscribeToProducts, subscribeToCategories, updateProductStockSafely } from "@/lib/firestore-service";
+import { processAndUploadImage } from "@/lib/image-utils";
 
 export default function AdminProductsPage() {
   const { success, error } = useToast();
@@ -189,21 +190,21 @@ export default function AdminProductsPage() {
     setPhotoUrlInput("");
   };
 
-  const handleMultipleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleMultipleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
-    Array.from(files).forEach((file) => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        if (typeof reader.result === "string") {
-          const result = reader.result;
-          setModalPhotos((prev) => [...prev, result]);
-        }
-      };
-      reader.readAsDataURL(file);
-    });
+    const fileList = Array.from(files);
     e.target.value = "";
+
+    for (const file of fileList) {
+      try {
+        const compressed = await processAndUploadImage(file, "products", 800, 800);
+        setModalPhotos((prev) => [...prev, compressed]);
+      } catch (err) {
+        console.error("Error processing image:", err);
+      }
+    }
   };
 
   const handleAddUrlPhoto = () => {
