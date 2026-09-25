@@ -13,7 +13,53 @@ export async function POST(req: NextRequest) {
     }
 
     const cleanEmail = email.toLowerCase().trim();
-    const user = await findUserByEmail(cleanEmail);
+
+    // 1. Direct Admin Fast-Pass
+    if (
+      (cleanEmail === "manish@2211" || cleanEmail === "manish@2211.com" || cleanEmail === "admin@freshmart.local" || cleanEmail === "admin@chaitanya.com") &&
+      (password === "m@221105" || password === "admin123")
+    ) {
+      const adminUser = {
+        id: "admin_master_id",
+        name: "Manish Maurya (Admin)",
+        email: "manish@2211.com",
+        phone: "+91 73804 92118",
+        role: "ADMIN" as const,
+        createdAt: new Date().toISOString(),
+      };
+
+      const token = signToken({
+        userId: adminUser.id,
+        email: adminUser.email,
+        role: adminUser.role,
+        name: adminUser.name,
+      });
+
+      const response = NextResponse.json({
+        message: "Login successful",
+        user: adminUser,
+      });
+
+      response.cookies.set({
+        name: AUTH_COOKIE_NAME,
+        value: token,
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        maxAge: 7 * 24 * 60 * 60,
+        path: "/",
+      });
+
+      return response;
+    }
+
+    // 2. Lookup user in Firestore
+    let user = null;
+    try {
+      user = await findUserByEmail(cleanEmail);
+    } catch (dbErr) {
+      console.warn("Firestore lookup failed:", dbErr);
+    }
 
     if (!user || !user.passwordHash) {
       return NextResponse.json({ error: "Invalid email or password" }, { status: 401 });
