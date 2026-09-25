@@ -197,13 +197,18 @@ export default function AdminProductsPage() {
     const fileList = Array.from(files);
     e.target.value = "";
 
-    for (const file of fileList) {
-      try {
-        const compressed = await processAndUploadImage(file, "products", 800, 800);
-        setModalPhotos((prev) => [...prev, compressed]);
-      } catch (err) {
-        console.error("Error processing image:", err);
+    try {
+      const results = await Promise.all(
+        fileList.map((file) => processAndUploadImage(file, "products", 800, 800))
+      );
+      const validImages = results.filter((img) => Boolean(img));
+      if (validImages.length > 0) {
+        setModalPhotos((prev) => [...prev, ...validImages]);
+        success(`${validImages.length} photo${validImages.length > 1 ? "s" : ""} added.`);
       }
+    } catch (err) {
+      console.error("Error processing image:", err);
+      error("Error adding photo.");
     }
   };
 
@@ -211,6 +216,7 @@ export default function AdminProductsPage() {
     if (photoUrlInput.trim()) {
       setModalPhotos((prev) => [...prev, photoUrlInput.trim()]);
       setPhotoUrlInput("");
+      success("Photo added from URL.");
     }
   };
 
