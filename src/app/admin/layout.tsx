@@ -30,10 +30,15 @@ export default function AdminLayout({
   const router = useRouter();
   const { user, logout, isAdmin, isLoading } = useAuth();
   const [mounted, setMounted] = useState(false);
+  const [timedOut, setTimedOut] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
   useEffect(() => {
     setMounted(true);
+    const timer = setTimeout(() => {
+      setTimedOut(true);
+    }, 400);
+    return () => clearTimeout(timer);
   }, []);
 
   const navLinks = [
@@ -46,7 +51,7 @@ export default function AdminLayout({
     { href: "/admin/settings", label: "Store Settings", icon: Settings },
   ];
 
-  if (!mounted || (isLoading && !user)) {
+  if (!mounted || (isLoading && !user && !timedOut)) {
     return (
       <div className="min-h-screen bg-slate-900 flex items-center justify-center text-white">
         <div className="text-center space-y-3">
