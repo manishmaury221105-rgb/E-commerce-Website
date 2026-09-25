@@ -30,10 +30,21 @@ export default function AdminLayout({
   const router = useRouter();
   const { user, logout, isAdmin, isLoading } = useAuth();
   const [mounted, setMounted] = useState(false);
+  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  const navLinks = [
+    { href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
+    { href: "/admin/products", label: "Products & Stock", icon: Package },
+    { href: "/admin/categories", label: "Categories & Banners", icon: Layers },
+    { href: "/admin/orders", label: "Orders & Delivery", icon: ShoppingBag },
+    { href: "/admin/coupons", label: "Coupons & Discounts", icon: Tag },
+    { href: "/admin/customers", label: "Customers CRM", icon: Users },
+    { href: "/admin/settings", label: "Store Settings", icon: Settings },
+  ];
 
   if (!mounted || (isLoading && !user)) {
     return (
@@ -78,18 +89,6 @@ export default function AdminLayout({
       </div>
     );
   }
-
-  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
-
-  const navLinks = [
-    { href: "/admin", label: "Dashboard", icon: LayoutDashboard, exact: true },
-    { href: "/admin/products", label: "Products & Stock", icon: Package },
-    { href: "/admin/categories", label: "Categories & Banners", icon: Layers },
-    { href: "/admin/orders", label: "Orders & Delivery", icon: ShoppingBag },
-    { href: "/admin/coupons", label: "Coupons & Discounts", icon: Tag },
-    { href: "/admin/customers", label: "Customers CRM", icon: Users },
-    { href: "/admin/settings", label: "Store Settings", icon: Settings },
-  ];
 
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col md:flex-row">
