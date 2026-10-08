@@ -303,7 +303,7 @@ export function subscribeToCustomerAddresses(
 async function createAdminDemoUser(): Promise<FirestoreUserData> {
   const passwordHash = await hashPassword("m@221105");
   const adminData = {
-    name: "Manish Maurya (Admin)",
+    name: "Digital Manish (Admin)",
     email: "manish@2211",
     passwordHash,
     phone: "+91 92144 68818",

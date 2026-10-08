@@ -102,14 +102,14 @@ export async function POST(req: NextRequest) {
       userId: "admin_fallback",
       email: "manish@2211",
       role: "ADMIN",
-      name: "Manish Maurya",
+      name: "Digital Manish",
     });
 
     const response = NextResponse.json({
       message: "Fallback login success",
       user: {
         id: "admin_fallback",
-        name: "Manish Maurya",
+        name: "Digital Manish",
         email: "manish@2211",
         phone: "+91 92144 68818",
         role: "ADMIN",

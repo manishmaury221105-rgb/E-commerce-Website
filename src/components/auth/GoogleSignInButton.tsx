@@ -48,14 +48,14 @@ export default function GoogleSignInButton({
       // seamlessly auto-fallback to authenticated Google user so the user is never blocked!
       if (res.code === "auth/unauthorized-domain" || !res.success) {
         console.warn("Firebase Google popup unauthorized domain detected, using seamless fallback.");
-        await handleDevGoogleLogin("manish.chaitanyashree@gmail.com", "Manish Maurya");
+        await handleDevGoogleLogin("manish.chaitanyashree@gmail.com", "Digital Manish");
         return;
       }
 
       error(res.error || "Google sign-in failed");
     } catch (err: any) {
       // Fallback on catch as well
-      await handleDevGoogleLogin("manish.chaitanyashree@gmail.com", "Manish Maurya");
+      await handleDevGoogleLogin("manish.chaitanyashree@gmail.com", "Digital Manish");
     } finally {
       setLoading(false);
     }
@@ -66,7 +66,7 @@ export default function GoogleSignInButton({
       setLoading(true);
       const fallbackUser = {
         email: customEmail || "manish.chaitanyashree@gmail.com",
-        displayName: customName || "Manish Maurya",
+        displayName: customName || "Digital Manish",
         phoneNumber: "+91 92144 68818",
         uid: "google_dev_" + Date.now(),
       };

@@ -21,7 +21,7 @@ export async function POST(req: NextRequest) {
     ) {
       const adminUser = {
         id: "admin_master_id",
-        name: "Manish Maurya (Admin)",
+        name: "Digital Manish (Admin)",
         email: "manish@2211",
         phone: "+91 92144 68818",
         role: "ADMIN" as const,

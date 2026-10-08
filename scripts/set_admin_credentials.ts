@@ -13,7 +13,7 @@ async function main() {
   const snapShort = await getDocs(qShort);
   if (snapShort.empty) {
     await addDoc(usersRef, {
-      name: "Manish Maurya (Admin)",
+      name: "Digital Manish (Admin)",
       email: "manish@2211",
       passwordHash: hash,
       role: "ADMIN",
@@ -26,7 +26,7 @@ async function main() {
   } else {
     for (const d of snapShort.docs) {
       await setDoc(doc(db, "users", d.id), {
-        name: "Manish Maurya (Admin)",
+        name: "Digital Manish (Admin)",
         email: "manish@2211",
         passwordHash: hash,
         role: "ADMIN",
