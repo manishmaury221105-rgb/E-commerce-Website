@@ -39,8 +39,8 @@ import {
 const DEFAULT_SETTINGS: StoreSetting = {
   id: "default",
   shopName: "चैतन्य श्री (Chaitanya Shree) - Wedding & Festive Collection",
-  phone: "+91 73804 92118",
-  whatsapp: "+917380492118",
+  phone: "+91 92144 68818",
+  whatsapp: "+919214468818",
   email: "contact@chaitanyashree.com",
   address: "चैतन्य श्री वेडिंग मॉल, मेन मार्केट, नियर सेंट्रल क्लॉक टॉवर",
   currency: "₹",

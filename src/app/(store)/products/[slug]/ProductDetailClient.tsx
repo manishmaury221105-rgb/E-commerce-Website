@@ -310,7 +310,7 @@ export function ProductDetailClient({ product: initialProduct, relatedProducts }
             {/* Direct WhatsApp Order Button */}
             <a
               href={generateWhatsAppProductOrderLink(
-                "+917380492118",
+                "+919214468818",
                 product.name,
                 product.price,
                 typeof window !== "undefined" ? window.location.href : ""

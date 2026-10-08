@@ -132,7 +132,7 @@ export function HomePageLive({
           </p>
           <div className="pt-2 flex flex-wrap gap-3">
             <a
-              href="https://wa.me/917380492118?text=Hi%20Chaitanya%20Shree,%20I%20would%20like%20to%20inquire%20about%20custom%20wedding%20orders:"
+              href="https://wa.me/919214468818?text=Hi%20Chaitanya%20Shree,%20I%20would%20like%20to%20inquire%20about%20custom%20wedding%20orders:"
               target="_blank"
               rel="noopener noreferrer"
               className="bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold text-xs sm:text-sm px-5 py-2.5 rounded-xl flex items-center gap-2 shadow-lg transition-all active:scale-95"

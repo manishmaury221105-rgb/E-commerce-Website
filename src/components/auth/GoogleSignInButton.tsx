@@ -67,7 +67,7 @@ export default function GoogleSignInButton({
       const fallbackUser = {
         email: customEmail || "manish.chaitanyashree@gmail.com",
         displayName: customName || "Manish Maurya",
-        phoneNumber: "+91 73804 92118",
+        phoneNumber: "+91 92144 68818",
         uid: "google_dev_" + Date.now(),
       };
 

@@ -168,8 +168,8 @@ model Banner {
 model StoreSetting {
   id               String   @id @default("default")
   shopName         String   @default("FreshMart Local Shop")
-  phone            String   @default("+91 73804 92118")
-  whatsapp         String   @default("+917380492118")
+  phone            String   @default("+91 92144 68818")
+  whatsapp         String   @default("+919214468818")
   email            String   @default("contact@freshmart.local")
   address          String   @default("Main Market, Shop #12, Near Clock Tower, City Center")
   currency         String   @default("₹")

@@ -129,7 +129,7 @@ export default function AdminOrderDetailPage() {
           </button>
           <a
             href={generateWhatsAppOrderSummaryLink(
-              order.customerPhone || "+917380492118",
+              order.customerPhone || "+919214468818",
               order.orderNumber,
               order.total,
               order.items.length,
@@ -228,7 +228,7 @@ export default function AdminOrderDetailPage() {
               </h2>
             </div>
             <p className="text-xs text-slate-600 mt-1">Shop #14, Royal Wedding Bazaar • Complete Wedding Collections</p>
-            <p className="text-xs text-slate-500">Phone / WhatsApp: +91 73804 92118</p>
+            <p className="text-xs text-slate-500">Phone / WhatsApp: +91 92144 68818</p>
           </div>
 
           <div className="text-left sm:text-right">
@@ -335,7 +335,7 @@ export default function AdminOrderDetailPage() {
         {/* Footer */}
         <div className="border-t border-slate-200 pt-4 text-center text-[10px] text-slate-500">
           <p className="font-semibold">Thank you for choosing चैतन्य श्री (Chaitanya Shree) Wedding Collections!</p>
-          <p>For custom bridal orders or inquiries, WhatsApp us at +91 73804 92118.</p>
+          <p>For custom bridal orders or inquiries, WhatsApp us at +91 92144 68818.</p>
         </div>
       </div>
     </div>

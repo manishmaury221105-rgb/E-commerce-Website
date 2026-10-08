@@ -79,8 +79,8 @@ export function Footer() {
               </div>
               <div className="flex items-center gap-2">
                 <Phone className="w-3.5 h-3.5 text-orange-500 flex-shrink-0" />
-                <a href="tel:+917380492118" className="hover:text-orange-400 transition-colors">
-                  +91 73804 92118
+                <a href="tel:+919214468818" className="hover:text-orange-400 transition-colors">
+                  +91 92144 68818
                 </a>
               </div>
             </div>
@@ -139,7 +139,7 @@ export function Footer() {
               </li>
               <li>
                 <a
-                  href="https://wa.me/917380492118?text=Hi%20Chaitanya%20Shree,%20I%20need%20assistance"
+                  href="https://wa.me/919214468818?text=Hi%20Chaitanya%20Shree,%20I%20need%20assistance"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="hover:text-orange-400 transition-colors flex items-center gap-1 text-orange-400 font-semibold"

@@ -116,7 +116,7 @@ export default function OrderDetailPage() {
 
           <a
             href={generateWhatsAppOrderSummaryLink(
-              "+917380492118",
+              "+919214468818",
               order.orderNumber,
               order.total,
               order.items.length,

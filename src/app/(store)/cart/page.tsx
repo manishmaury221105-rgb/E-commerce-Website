@@ -317,7 +317,7 @@ export default function CartPage() {
 
               <a
                 href={generateWhatsAppSupportLink(
-                  "+917380492118",
+                  "+919214468818",
                   `नमस्ते चैतन्य श्री, here is my cart order:\n${items
                     .map((i) => `• ${i.name} (${i.unit}) x ${i.quantity} = ₹${i.price * i.quantity}`)
                     .join("\n")}\n\n*Total:* ₹${total}\n\nPlease confirm availability. Dhanyawad!`

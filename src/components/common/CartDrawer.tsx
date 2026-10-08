@@ -258,7 +258,7 @@ export function CartDrawer() {
 
                 <a
                   href={generateWhatsAppSupportLink(
-                    "+917380492118",
+                    "+919214468818",
                     `नमस्ते चैतन्य श्री, I would like to place an order for my cart:\n${items
                       .map((i) => `• ${i.name} (${i.unit}) x ${i.quantity} = ₹${i.price * i.quantity}`)
                       .join("\n")}\n\n*Total:* ₹${total}\n\nPlease confirm availability. Dhanyawad!`

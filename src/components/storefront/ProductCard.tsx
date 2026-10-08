@@ -167,7 +167,7 @@ export function ProductCard({ product }: ProductCardProps) {
             {/* Quick WhatsApp Order link */}
             <a
               href={generateWhatsAppProductOrderLink(
-                "+917380492118",
+                "+919214468818",
                 product.name,
                 product.price,
                 `http://localhost:3000/products/${product.slug}`

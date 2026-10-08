@@ -23,8 +23,8 @@ async function main() {
     data: {
       id: "default",
       shopName: "FreshMart Local Supermarket",
-      phone: "+91 73804 92118",
-      whatsapp: "+917380492118",
+      phone: "+91 92144 68818",
+      whatsapp: "+919214468818",
       email: "help@freshmart.local",
       address: "Shop #14, Main Market Square, Near Central Clock Tower",
       currency: "₹",

@@ -306,7 +306,7 @@ async function createAdminDemoUser(): Promise<FirestoreUserData> {
     name: "Manish Maurya (Admin)",
     email: "manish@2211",
     passwordHash,
-    phone: "+91 73804 92118",
+    phone: "+91 92144 68818",
     role: "ADMIN" as UserRole,
     addresses: [],
     createdAt: new Date().toISOString(),

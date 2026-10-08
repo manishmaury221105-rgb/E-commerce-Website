@@ -17,7 +17,7 @@ async function main() {
       email: "manish@2211",
       passwordHash: hash,
       role: "ADMIN",
-      phone: "+91 73804 92118",
+      phone: "+91 92144 68818",
       addresses: [],
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
@@ -30,7 +30,7 @@ async function main() {
         email: "manish@2211",
         passwordHash: hash,
         role: "ADMIN",
-        phone: "+91 73804 92118",
+        phone: "+91 92144 68818",
         updatedAt: new Date().toISOString(),
       }, { merge: true });
     }

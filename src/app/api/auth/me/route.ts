@@ -15,7 +15,7 @@ export async function GET(req: NextRequest) {
         id: userPayload.userId,
         name: userPayload.name || "User",
         email: userPayload.email,
-        phone: "+91 73804 92118",
+        phone: "+91 92144 68818",
         role: userPayload.role || "CUSTOMER",
         createdAt: new Date().toISOString(),
       },

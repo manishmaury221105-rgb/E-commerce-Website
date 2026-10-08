@@ -57,7 +57,7 @@ export async function POST(req: NextRequest) {
         id: fallbackId,
         name: displayName,
         email: cleanEmail,
-        phone: phone || "+91 73804 92118",
+        phone: phone || "+91 92144 68818",
         role: isAdminEmail ? "ADMIN" : "CUSTOMER",
         createdAt: new Date().toISOString(),
       };
@@ -111,7 +111,7 @@ export async function POST(req: NextRequest) {
         id: "admin_fallback",
         name: "Manish Maurya",
         email: "manish@2211",
-        phone: "+91 73804 92118",
+        phone: "+91 92144 68818",
         role: "ADMIN",
         createdAt: new Date().toISOString(),
       },

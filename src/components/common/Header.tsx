@@ -67,7 +67,7 @@ export function Header() {
           </div>
           <div className="hidden md:flex items-center gap-4 text-orange-100 flex-shrink-0 text-xs">
             <a
-              href="https://wa.me/917380492118?text=Hi%20Chaitanya%20Shree,%20I%20need%20help%20with%20wedding%20collection"
+              href="https://wa.me/919214468818?text=Hi%20Chaitanya%20Shree,%20I%20need%20help%20with%20wedding%20collection"
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-1 hover:text-white transition-colors"
@@ -78,7 +78,7 @@ export function Header() {
             <span>|</span>
             <span className="flex items-center gap-1">
               <Phone className="w-3.5 h-3.5 text-amber-300" />
-              <span>+91 73804 92118</span>
+              <span>+91 92144 68818</span>
             </span>
           </div>
         </div>
@@ -329,7 +329,7 @@ export function Header() {
               Track Order
             </Link>
             <a
-              href="https://wa.me/917380492118?text=Hi%20Chaitanya%20Shree,%20I%20want%20to%20place%20a%20wedding%20order"
+              href="https://wa.me/919214468818?text=Hi%20Chaitanya%20Shree,%20I%20want%20to%20place%20a%20wedding%20order"
               target="_blank"
               rel="noopener noreferrer"
               className="text-orange-600 dark:text-orange-400 font-semibold hover:underline"
@@ -452,7 +452,7 @@ export function Header() {
                 </Link>
 
                 <a
-                  href="https://wa.me/917380492118?text=Hi%20Chaitanya%20Shree,%20I%20need%20help%20with%20wedding%20orders"
+                  href="https://wa.me/919214468818?text=Hi%20Chaitanya%20Shree,%20I%20need%20help%20with%20wedding%20orders"
                   target="_blank"
                   rel="noopener noreferrer"
                   className="flex items-center gap-2.5 px-3 py-2 rounded-xl text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800 font-medium"

@@ -7,7 +7,7 @@ import { generateWhatsAppSupportLink } from "@/lib/utils";
 export function WhatsAppWidget() {
   const [isOpen, setIsOpen] = useState(false);
   const [customMsg, setCustomMsg] = useState("");
-  const phone = "+917380492118";
+  const phone = "+919214468818";
 
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();

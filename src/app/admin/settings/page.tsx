@@ -10,8 +10,8 @@ export default function AdminSettingsPage() {
   const { success, error } = useToast();
 
   const [shopName, setShopName] = useState("चैतन्य श्री (Chaitanya Shree) - Wedding & Festive Collection");
-  const [phone, setPhone] = useState("+91 73804 92118");
-  const [whatsapp, setWhatsapp] = useState("+917380492118");
+  const [phone, setPhone] = useState("+91 92144 68818");
+  const [whatsapp, setWhatsapp] = useState("+919214468818");
   const [email, setEmail] = useState("info@chaitanyashree.in");
   const [address, setAddress] = useState("Shop #14, Royal Heritage Wedding Complex, Main Bazaar");
   const [currency, setCurrency] = useState("₹");
