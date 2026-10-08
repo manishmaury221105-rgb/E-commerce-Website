@@ -550,6 +550,19 @@ export async function updateOrderStatus(
   return { ...order, ...updates };
 }
 
+export async function deleteOrder(orderId: string): Promise<boolean> {
+  try {
+    const order = await getOrderByIdOrNumber(orderId);
+    if (!order) return false;
+    const docRef = doc(db, "orders", order.id);
+    await deleteDoc(docRef);
+    return true;
+  } catch (error) {
+    console.error(`deleteOrder error for ${orderId}:`, error);
+    return false;
+  }
+}
+
 // ==========================================
 // 6. COUPONS
 // ==========================================

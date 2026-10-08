@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getOrderByIdOrNumber, updateOrderStatus } from "@/lib/firestore-service";
+import { getOrderByIdOrNumber, updateOrderStatus, deleteOrder } from "@/lib/firestore-service";
 import { getCurrentUserFromRequest } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
@@ -39,3 +39,23 @@ export async function PUT(req: NextRequest, { params }: { params: { id: string }
     return NextResponse.json({ error: "Failed to update order" }, { status: 500 });
   }
 }
+
+export async function DELETE(req: NextRequest, { params }: { params: { id: string } }) {
+  try {
+    const userPayload = getCurrentUserFromRequest(req);
+    if (!userPayload || (userPayload.role !== "ADMIN" && userPayload.role !== "STAFF")) {
+      return NextResponse.json({ error: "Unauthorized. Admin privileges required." }, { status: 403 });
+    }
+
+    const { id } = params;
+    const deleted = await deleteOrder(id);
+    if (!deleted) {
+      return NextResponse.json({ error: "Order not found or delete failed" }, { status: 404 });
+    }
+
+    return NextResponse.json({ message: "Order deleted successfully" });
+  } catch (error: any) {
+    return NextResponse.json({ error: "Failed to delete order" }, { status: 500 });
+  }
+}
+

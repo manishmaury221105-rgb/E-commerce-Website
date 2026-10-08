@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { ShoppingBag, Search, Filter, Printer, ExternalLink, CheckCircle2, Clock } from "lucide-react";
+import { ShoppingBag, Search, Filter, Printer, ExternalLink, CheckCircle2, Clock, Trash2, AlertTriangle, X } from "lucide-react";
 import { formatCurrency, formatDate } from "@/lib/utils";
 import { ORDER_STATUS_LABELS, PAYMENT_STATUS_LABELS } from "@/lib/constants";
 import { useToast } from "@/context/ToastContext";
@@ -15,6 +15,8 @@ export default function AdminOrdersPage() {
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [search, setSearch] = useState("");
+  const [orderToDelete, setOrderToDelete] = useState<Order | null>(null);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     const unsubscribe = subscribeToOrders((liveOrders) => {
@@ -54,6 +56,29 @@ export default function AdminOrdersPage() {
     }
   };
 
+  const handleDeleteOrder = async () => {
+    if (!orderToDelete) return;
+    try {
+      setDeleting(true);
+      const res = await fetch(`/api/orders/${orderToDelete.id}`, {
+        method: "DELETE",
+      });
+
+      if (res.ok) {
+        success(`Order ${orderToDelete.orderNumber} deleted permanently`);
+        setAllOrders((prev) => prev.filter((o) => o.id !== orderToDelete.id));
+        setOrderToDelete(null);
+      } else {
+        const data = await res.json().catch(() => ({}));
+        error(data.error || "Failed to delete order");
+      }
+    } catch (err) {
+      error("Network error while deleting order");
+    } finally {
+      setDeleting(false);
+    }
+  };
+
   const filteredOrders = orders.filter((o) => {
     if (!search.trim()) return true;
     const q = search.toLowerCase();
@@ -73,7 +98,7 @@ export default function AdminOrdersPage() {
             Customer Orders & Fulfillment
           </h1>
           <p className="text-xs text-slate-400 mt-0.5">
-            Accept orders, assign delivery, update live tracking status, and print thermal slips
+            Accept orders, assign delivery, update live tracking status, and manage or delete orders
           </p>
         </div>
       </div>
@@ -211,10 +236,17 @@ export default function AdminOrdersPage() {
                         <div className="flex items-center justify-end gap-2">
                           <Link
                             href={`/admin/orders/${order.id}`}
-                            className="bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold px-3 py-1.5 rounded-xl transition-colors"
+                            className="bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold px-3 py-1.5 rounded-xl transition-colors text-xs"
                           >
                             Details & Slip
                           </Link>
+                          <button
+                            onClick={() => setOrderToDelete(order)}
+                            title="Delete Order"
+                            className="bg-rose-500/10 hover:bg-rose-600 text-rose-400 hover:text-white p-1.5 rounded-xl transition-all border border-rose-500/20 active:scale-95"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
                         </div>
                       </td>
                     </tr>
@@ -225,6 +257,64 @@ export default function AdminOrdersPage() {
           </div>
         )}
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {orderToDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-4 animate-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+              <div className="flex items-center gap-2.5 text-rose-500">
+                <div className="p-2 bg-rose-500/10 rounded-xl border border-rose-500/20">
+                  <AlertTriangle className="w-5 h-5" />
+                </div>
+                <h3 className="font-heading font-extrabold text-lg text-white">Delete Order?</h3>
+              </div>
+              <button
+                onClick={() => setOrderToDelete(null)}
+                disabled={deleting}
+                className="text-slate-400 hover:text-white p-1 rounded-lg"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="text-xs text-slate-300 space-y-2">
+              <p>
+                Are you sure you want to permanently delete order{" "}
+                <strong className="text-white font-mono">{orderToDelete.orderNumber}</strong>?
+              </p>
+              <div className="p-3 bg-slate-800/60 rounded-xl border border-slate-700/50 space-y-1 text-slate-400 text-[11px]">
+                <p>👤 Customer: <strong className="text-slate-200">{orderToDelete.customerName}</strong></p>
+                <p>💰 Amount: <strong className="text-slate-200">{formatCurrency(orderToDelete.total)}</strong></p>
+                <p>📦 Items: <strong className="text-slate-200">{orderToDelete.items.length} items</strong></p>
+              </div>
+              <p className="text-rose-400 font-semibold text-[11px]">
+                ⚠️ This action cannot be undone and will remove the order completely from database.
+              </p>
+            </div>
+
+            <div className="flex items-center justify-end gap-2.5 pt-2">
+              <button
+                type="button"
+                onClick={() => setOrderToDelete(null)}
+                disabled={deleting}
+                className="bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold px-4 py-2 rounded-xl text-xs transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleDeleteOrder}
+                disabled={deleting}
+                className="bg-rose-600 hover:bg-rose-500 active:scale-95 disabled:opacity-50 text-white font-bold px-4 py-2 rounded-xl text-xs transition-all flex items-center gap-1.5 shadow-lg shadow-rose-600/20"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>{deleting ? "Deleting..." : "Delete Order"}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

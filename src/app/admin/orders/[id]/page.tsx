@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   ArrowLeft,
@@ -15,6 +15,9 @@ import {
   FileText,
   Save,
   MessageCircle,
+  Trash2,
+  AlertTriangle,
+  X,
 } from "lucide-react";
 import { formatCurrency, formatDate, generateWhatsAppOrderSummaryLink } from "@/lib/utils";
 import { ORDER_STATUS_LABELS, PAYMENT_STATUS_LABELS, PAYMENT_METHOD_LABELS } from "@/lib/constants";
@@ -24,12 +27,15 @@ import { subscribeToOrder } from "@/lib/firestore-service";
 
 export default function AdminOrderDetailPage() {
   const params = useParams();
+  const router = useRouter();
   const orderId = params.id as string;
   const { success, error } = useToast();
 
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   // Status and Notes Form
   const [selectedStatus, setSelectedStatus] = useState<OrderStatus>("PENDING");
@@ -96,6 +102,28 @@ export default function AdminOrderDetailPage() {
 
   const address = typeof order.shippingAddress === "string" ? JSON.parse(order.shippingAddress) : order.shippingAddress;
 
+  const handleDeleteOrder = async () => {
+    if (!order) return;
+    try {
+      setDeleting(true);
+      const res = await fetch(`/api/orders/${order.id}`, {
+        method: "DELETE",
+      });
+
+      if (res.ok) {
+        success(`Order ${order.orderNumber} deleted permanently`);
+        router.push("/admin/orders");
+      } else {
+        const data = await res.json().catch(() => ({}));
+        error(data.error || "Failed to delete order");
+        setDeleting(false);
+      }
+    } catch (err) {
+      error("Network error while deleting order");
+      setDeleting(false);
+    }
+  };
+
   const handlePrintSlip = () => {
     window.print();
   };
@@ -119,13 +147,13 @@ export default function AdminOrderDetailPage() {
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={handlePrintSlip}
             className="bg-slate-800 hover:bg-slate-700 text-slate-200 font-bold text-xs px-3.5 py-2 rounded-xl border border-slate-700 transition-colors flex items-center gap-1.5"
           >
             <Printer className="w-4 h-4" />
-            <span>Print Thermal Packing Slip</span>
+            <span>Print Packing Slip</span>
           </button>
           <a
             href={generateWhatsAppOrderSummaryLink(
@@ -140,8 +168,15 @@ export default function AdminOrderDetailPage() {
             className="bg-[#25D366] hover:bg-[#20bd5a] text-white font-bold text-xs px-3.5 py-2 rounded-xl transition-colors flex items-center gap-1.5"
           >
             <MessageCircle className="w-4 h-4" />
-            <span>WhatsApp Customer</span>
+            <span>WhatsApp</span>
           </a>
+          <button
+            onClick={() => setShowDeleteModal(true)}
+            className="bg-rose-500/10 hover:bg-rose-600 text-rose-400 hover:text-white font-bold text-xs px-3.5 py-2 rounded-xl border border-rose-500/20 transition-all flex items-center gap-1.5 active:scale-95"
+          >
+            <Trash2 className="w-4 h-4" />
+            <span>Delete Order</span>
+          </button>
         </div>
       </div>
 
@@ -338,6 +373,64 @@ export default function AdminOrderDetailPage() {
           <p>For custom bridal orders or inquiries, WhatsApp us at +91 92144 68818.</p>
         </div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-xs animate-in fade-in duration-150">
+          <div className="bg-slate-900 border border-slate-800 rounded-3xl p-6 max-w-md w-full shadow-2xl space-y-4 animate-in zoom-in-95 duration-150">
+            <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+              <div className="flex items-center gap-2.5 text-rose-500">
+                <div className="p-2 bg-rose-500/10 rounded-xl border border-rose-500/20">
+                  <AlertTriangle className="w-5 h-5" />
+                </div>
+                <h3 className="font-heading font-extrabold text-lg text-white">Delete Order?</h3>
+              </div>
+              <button
+                onClick={() => setShowDeleteModal(false)}
+                disabled={deleting}
+                className="text-slate-400 hover:text-white p-1 rounded-lg"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="text-xs text-slate-300 space-y-2">
+              <p>
+                Are you sure you want to permanently delete order{" "}
+                <strong className="text-white font-mono">{order.orderNumber}</strong>?
+              </p>
+              <div className="p-3 bg-slate-800/60 rounded-xl border border-slate-700/50 space-y-1 text-slate-400 text-[11px]">
+                <p>👤 Customer: <strong className="text-slate-200">{order.customerName}</strong></p>
+                <p>💰 Amount: <strong className="text-slate-200">{formatCurrency(order.total)}</strong></p>
+                <p>📦 Items: <strong className="text-slate-200">{order.items.length} items</strong></p>
+              </div>
+              <p className="text-rose-400 font-semibold text-[11px]">
+                ⚠️ This action cannot be undone and will remove the order permanently from Firestore.
+              </p>
+            </div>
+
+            <div className="flex items-center justify-end gap-2.5 pt-2">
+              <button
+                type="button"
+                onClick={() => setShowDeleteModal(false)}
+                disabled={deleting}
+                className="bg-slate-800 hover:bg-slate-700 text-slate-300 font-bold px-4 py-2 rounded-xl text-xs transition-colors"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleDeleteOrder}
+                disabled={deleting}
+                className="bg-rose-600 hover:bg-rose-500 active:scale-95 disabled:opacity-50 text-white font-bold px-4 py-2 rounded-xl text-xs transition-all flex items-center gap-1.5 shadow-lg shadow-rose-600/20"
+              >
+                <Trash2 className="w-3.5 h-3.5" />
+                <span>{deleting ? "Deleting..." : "Delete Order"}</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
